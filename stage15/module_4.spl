@@ -1,0 +1,18 @@
+alias fNum R1;
+alias currPID R2;
+alias word R3;
+if(fNum==3) then
+    multipush(R0,R1,R2,R3);
+    fNum=8;
+    currPID=[SYSTEM_STATUS_TABLE+1];
+    call MOD_0;
+    multipop(R0,R1,R2,R3);
+    print R3;
+    multipush(R0,R1,R2,R3);
+    fNum=9;
+    currPID=[SYSTEM_STATUS_TABLE+1];
+    call MOD_0;
+    multipop(R0,R1,R2,R3);
+endif;
+
+return;

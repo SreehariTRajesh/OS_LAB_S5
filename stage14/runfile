@@ -1,0 +1,9 @@
+load --idle ../stage12/idle.xsm
+load --init ../stage14/assignment1/prime.xsm
+load --os ../stage14/os_startup.xsm
+load --int=timer ../stage14/sample_timer.xsm
+load --int=7 ../stage14/sample_int7.xsm
+load --module 7 ../stage14/assignment1/boot_module.xsm
+load --int=10 ../stage14/int10.xsm
+load --module 5 ../stage14/scheduler_module.xsm
+exit

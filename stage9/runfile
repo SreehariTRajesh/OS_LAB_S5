@@ -1,0 +1,3 @@
+load --os ../stage9/os_startup.xsm
+load --int=timer ../stage9/sample_timer.xsm
+load --init ../stage9/init.xsm

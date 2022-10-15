@@ -1,0 +1,20 @@
+alias pid R0;
+pid=[SYSTEM_STATUS_TABLE+1];
+alias proc R2;
+proc=PROCESS_TABLE+pid*16;
+[proc+4]=TERMINATED;
+
+alias i R1;
+i=1;
+while(i<16) do
+    if([PROCESS_TABLE+i*16+4]!=TERMINATED) then
+        break;
+    endif;
+    i=i+1;
+endwhile;
+
+if(i==16) then
+    halt;
+endif;
+
+call MOD_5;

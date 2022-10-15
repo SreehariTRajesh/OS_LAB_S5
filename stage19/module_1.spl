@@ -1,0 +1,84 @@
+alias functionNum R1;
+alias pid R2;
+if(functionNum==FREE_USER_AREA_PAGE) then
+    multipush(R1,R2);
+    alias userAreaPage R2;
+    userAreaPage=[SYSTEM_STATUS_TABLE+pid*16+11];
+    call MOD_2;
+    multipop(R1,R2);
+endif;
+
+if(functionNum==EXIT_PROCESS) then
+    multipush(R1,R2);
+    pid=R2;
+    functionNum=FREE_PAGE_TABLE;
+    call MOD_1;
+    multipop(R1,R2);
+
+    multipush(R1,R2);
+    functionNum=FREE_USER_AREA_PAGE;
+    call MOD_1;
+    multipop(R1,R2);
+    
+    [PROCESS_TABLE+pid*16+4]=TERMINATED;
+endif;
+
+if(functionNum==FREE_PAGE_TABLE) then
+    [PTBR+0]=-1;
+    [PTBR+1]="0000";
+    [PTBR+2]=-1;
+    [PTBR+3]="0000";
+    alias j R3;
+    j=4;
+    while(j<20) do
+        if([PTBR+j]!=-1) then
+            multipush(R1,R2);
+            alias page R2;
+            page=[PTBR+j];
+            call MOD_2;
+            [PTBR+j]=-1;
+            multipop(R1,R2);
+            [PTBR+j+1]="0000";
+        endif;
+        j=j+2;
+    endwhile;
+    if([DISK_MAP_TABLE+pid*16+2]!=-1) then
+       multipush(R0,R1,R2,R3);
+       R1=RELEASE_BLOCK;
+       R2=[DISK_MAP_TABLE+pid*16+8];
+       R3=pid;
+       call MOD_2;
+       multipop(R0,R1,R2,R3);
+    endif;
+    if([DISK_MAP_TABLE+pid*16+3]!=-1) then
+       multipush(R0,R1,R2,R3);
+       R1=RELEASE_BLOCK;
+       R2=[DISK_MAP_TABLE+pid*16+8];
+       R3=pid;
+       call MOD_2;
+       multipop(R0,R1,R2,R3);
+    endif;
+    if([DISK_MAP_TABLE+pid*16+8]!=-1) then
+       multipush(R0,R1,R2,R3);
+       R1=RELEASE_BLOCK;
+       R2=[DISK_MAP_TABLE+pid*16+8];
+       R3=pid;
+       call MOD_2;
+       multipop(R0,R1,R2,R3);
+    endif;
+    if([DISK_MAP_TABLE+pid*16+9]!=-1) then
+       multipush(R0,R1,R2,R3);
+       R1=RELEASE_BLOCK;
+       R2=[DISK_MAP_TABLE+pid*16+8];
+       R3=pid;
+       call MOD_2;
+       multipop(R0,R1,R2,R3);
+    endif;
+    j=2;
+    while(j<10) do
+        [DISK_MAP_TABLE+pid*10+j]=-1;
+        j=j+1;
+    endwhile;
+endif;
+
+return;

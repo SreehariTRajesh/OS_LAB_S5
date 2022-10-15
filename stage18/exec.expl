@@ -1,0 +1,13 @@
+int main(){
+    decl
+      str prog;
+      int t,w;
+    enddecl
+    begin
+      w=-1;
+      t=exposcall("Read",-1,prog);
+      t=exposcall("Write",-2,w);
+      t=exposcall("Exec",prog);
+      return 0;
+    end
+}

@@ -1,0 +1,5 @@
+load --os ../stage11/os_startup.xsm
+load --int=timer ../stage11/sample_timer.xsm
+load --init ../stage11/init.xsm
+load --int=7 ../stage11/sample_int7.xsm
+exit

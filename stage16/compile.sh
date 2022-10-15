@@ -1,0 +1,20 @@
+./spl ../stage16/os_startup.spl
+echo "Successful"
+./spl ../stage16/scheduler_module.spl
+echo "Successful"
+./spl ../stage16/boot_module.spl
+echo "Successful"
+./spl ../stage16/sample_int7.spl
+echo "Successful"
+./spl ../stage16/sample_timer.spl
+echo "Successful"
+./spl ../stage16/int10.spl
+echo "Successful"
+./spl ../stage16/module_0.spl
+echo "Successful"
+./spl ../stage16/module_4.spl
+echo "Successful"
+./spl ../stage16/sample_int6.spl
+echo "Successful"
+./spl ../stage16/console_interrupt.spl
+

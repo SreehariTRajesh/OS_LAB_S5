@@ -1,0 +1,11 @@
+load --os ../stage16/os_startup.xsm
+load --int=6 ../stage16/sample_int6.xsm
+load --int=timer ../stage16/sample_timer.xsm
+load --int=7 ../stage16/sample_int7.xsm
+load --int=console ../stage16/console_interrupt.xsm
+load --module 7 ../stage16/boot_module.xsm
+load --int=10 ../stage16/int10.xsm
+load --module 5 ../stage16/scheduler_module.xsm
+load --module 0 ../stage16/module_0.xsm
+load --module 4 ../stage16/module_4.xsm
+exit

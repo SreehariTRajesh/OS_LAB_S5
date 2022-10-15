@@ -1,0 +1,9 @@
+load --os ../stage15/os_startup.xsm
+load --int=timer ../stage15/sample_timer.xsm
+load --int=7 ../stage15/sample_int7.xsm
+load --module 7 ../stage15/boot_module.xsm
+load --int=10 ../stage15/int10.xsm
+load --module 5 ../stage15/scheduler_module.xsm
+load --module 0 ../stage15/assignment1/module_0.xsm
+load --module 4 ../stage15/module_4.xsm
+exit

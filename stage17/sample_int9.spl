@@ -1,0 +1,107 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=9;
+alias fileNamePhysicalAddr R1;
+fileNamePhysicalAddr=[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512;
+alias fileName R2;
+fileName=[fileNamePhysicalAddr];
+
+alias index R3;
+index=0;
+while(index<60) do
+    if([INODE_TABLE+index*16+1]==fileName && [INODE_TABLE+index*16]==EXEC) then
+        break;
+    endif;
+    index=index+1;
+endwhile;
+
+if(index==60) then
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    ireturn;
+endif;
+
+// Call Exit Process;
+multipush(R0,R1,R2,R3);
+R1=3;
+R2=[SYSTEM_STATUS_TABLE+1];
+call MOD_1;
+multipop(R0,R1,R2,R3);
+
+
+[MEMORY_FREE_LIST+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]]=1;
+// MEM_FREE_COUNT is decremented;
+[SYSTEM_STATUS_TABLE+2]=[SYSTEM_STATUS_TABLE+2]-1;
+
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=RUNNING;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+7]=index;
+
+[PTBR+0]=63;
+[PTBR+1]="0100";
+[PTBR+2]=64;
+[PTBR+3]="0100";
+
+multipush(R0,R1,R2,R3);
+R1=GET_FREE_PAGE;
+R2=[SYSTEM_STATUS_TABLE+1];
+call MOD_2;
+[PTBR+4]=R0;
+[PTBR+5]="0110";
+multipop(R0,R1,R2,R3);
+
+multipush(R0,R1,R2,R3);
+R1=GET_FREE_PAGE;
+R2=[SYSTEM_STATUS_TABLE+1];
+call MOD_2;
+[PTBR+6]=R0;
+[PTBR+7]="0110";
+multipop(R0,R1,R2,R3);
+
+multipush(R0,R1,R2,R3);
+R1=GET_FREE_PAGE;
+R2=[SYSTEM_STATUS_TABLE+1];
+call MOD_2;
+[PTBR+16]=R0;
+[PTBR+17]="0110";
+multipop(R0,R1,R2,R3);
+
+multipush(R0,R1,R2,R3);
+R1=GET_FREE_PAGE;
+R2=[SYSTEM_STATUS_TABLE+1];
+call MOD_2;
+[PTBR+18]=R0;
+[PTBR+19]="0110";
+multipop(R0,R1,R2,R3);
+
+alias i R4;
+i=0;
+
+while(i<4) do
+    if([INODE_TABLE+index*16+i+8]!=-1) then
+        multipush(R0,R1,R2,R3);
+        R1=GET_FREE_PAGE;
+        R2=[SYSTEM_STATUS_TABLE+1];
+        call MOD_2;    
+        loadi(R0,[INODE_TABLE+index*16+i+8]);
+        [PTBR+2*i+8]=R0;
+        [PTBR+2*i+9]="0100";
+        multipop(R0,R1,R2,R3);
+    else
+        [PTBR+2*i+8]=-1;
+        [PTBR+2*i+9]="0000";
+    endif;
+    i=i+1;
+endwhile;
+
+[[PTBR+16]*512]=[[PTBR+8]*512+1];
+
+
+SP=8*512;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+breakpoint;
+ireturn;
+

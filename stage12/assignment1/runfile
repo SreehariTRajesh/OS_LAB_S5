@@ -1,0 +1,6 @@
+load --idle ../stage12/assignment1/idle.xsm
+load --os ../stage12/assignment1/os_startup.xsm
+load --int=timer ../stage12/sample_timer.xsm
+load --init ../stage12/init.xsm
+load --int=7 ../stage12/sample_int7.xsm
+exit

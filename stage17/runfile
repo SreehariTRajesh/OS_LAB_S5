@@ -1,0 +1,27 @@
+load --os ../stage17/os_startup.xsm
+ls
+load --int=6 ../stage17/sample_int6.xsm
+ls
+load --int=timer ../stage17/sample_timer.xsm
+ls
+load --int=7 ../stage17/sample_int7.xsm
+ls
+load --int=console ../stage17/console_interrupt.xsm
+ls
+load --module 7 ../stage17/boot_module.xsm
+ls
+load --int=10 ../stage17/int10.xsm
+ls
+load --int=9 ../stage17/sample_int9.xsm
+ls
+load --module 5 ../stage17/scheduler_module.xsm
+ls
+load --module 0 ../stage17/module_0.xsm
+ls
+load --module 1 ../stage17/module_1.xsm
+ls
+load --module 2 ../stage17/module_2.xsm
+ls
+load --module 4 ../stage17/module_4.xsm
+ls
+exit

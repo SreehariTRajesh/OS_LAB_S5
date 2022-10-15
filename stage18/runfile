@@ -1,0 +1,15 @@
+load --os ../stage18/os_startup.xsm
+load --int=6 ../stage18/sample_int6.xsm
+load --int=timer ../stage18/sample_timer.xsm
+load --int=7 ../stage18/sample_int7.xsm
+load --int=console ../stage18/console_interrupt.xsm
+load --int=disk ../stage18/disk_interrupt.xsm
+load --module 7 ../stage18/boot_module.xsm
+load --int=10 ../stage18/int10.xsm
+load --int=9 ../stage18/sample_int9.xsm
+load --module 5 ../stage18/scheduler_module.xsm
+load --module 0 ../stage18/module_0.xsm
+load --module 1 ../stage18/module_1.xsm
+load --module 2 ../stage18/module_2.xsm
+load --module 4 ../stage18/module_4.xsm
+exit

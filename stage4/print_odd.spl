@@ -1,0 +1,9 @@
+alias count R0;
+count=0;
+while(count<=20) do
+	if(count%2==1) then
+	   print count;
+	endif;
+	count=count+1;
+endwhile;
+

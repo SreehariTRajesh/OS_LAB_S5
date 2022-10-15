@@ -1,0 +1,43 @@
+alias functionNum R1;
+alias pid R2;
+if(functionNum==FREE_USER_AREA_PAGE) then
+    multipush(R1,R2);
+    alias userAreaPage R2;
+    userAreaPage=[SYSTEM_STATUS_TABLE+pid*16+11];
+    call MOD_2;
+    multipop(R1,R2);
+endif;
+
+if(functionNum==EXIT_PROCESS) then
+    multipush(R1,R2);
+    pid=R2;
+    functionNum=FREE_PAGE_TABLE;
+    call MOD_1;
+    multipop(R1,R2);
+    functionNum=FREE_USER_AREA_PAGE;
+    call MOD_1;
+    [PROCESS_TABLE+pid*16+4]=TERMINATED;
+endif;
+
+if(functionNum==FREE_PAGE_TABLE) then
+    [PTBR+0]=-1;
+    [PTBR+1]="0000";
+    [PTBR+2]=-1;
+    [PTBR+3]="0000";
+    alias j R3;
+    j=4;
+    while(j<20) do
+        if([PTBR+j]!=-1) then
+            multipush(R1,R2);
+            alias page R2;
+            page=[PTBR+j];
+            call MOD_2;
+            [PTBR+j]=-1;
+            multipop(R1,R2);
+            [PTBR+j+1]="0000";
+        endif;
+        j=j+2;
+    endwhile;
+endif;
+
+return;

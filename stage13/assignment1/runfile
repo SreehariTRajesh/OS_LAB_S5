@@ -1,0 +1,6 @@
+load --os ../stage13/os_startup.xsm
+load --int=timer ../stage13/assignment1/sample_timer.xsm
+load --idle ../stage12/idle.xsm
+load --init ../stage13/assignment1/odd.xsm
+load --int=7 ../stage13/sample_int7.xsm
+load --module 7 ../stage13/assignment1/boot_module.xsm
