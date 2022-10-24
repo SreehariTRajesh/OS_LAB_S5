@@ -1,0 +1,117 @@
+alias userSP R0;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=8;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+alias childPID R5;
+alias stack_1 R6;
+alias stack_2 R7;
+
+multipush(R0,R1,R5);
+R1=GET_PCB_ENTRY;
+call MOD_1;
+R10=R0;
+multipop(R0,R1,R5);
+childPID=R10;
+
+if(childPID==-1) then
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    ireturn;
+else 
+    if([PTBR+4]==-1 && [PTBR+6]==-1) then
+        multipush(R0,R1,R5);
+        R1=GET_FREE_PAGE;
+        call MOD_2;
+        [PTBR+4]=R0;
+        [PTBR+5]="1110";
+        multipop(R0,R1,R5);
+        multipush(R0,R1,R5);
+        R1=GET_FREE_PAGE;
+        call MOD_2;
+        [PTBR+6]=R0;
+        [PTBR+7]="1110";
+        multipop(R0,R1,R5);
+    endif;
+
+    R10=childPID;
+    multipush(R0,R1,R5);
+    R1=GET_FREE_PAGE;
+    call MOD_2;
+    stack_1=R0;
+    multipop(R0,R1,R5);
+
+
+    R10=childPID;
+    multipush(R0,R1,R5);
+    R1=GET_FREE_PAGE;
+    call MOD_2;
+    stack_2=R0;
+    multipop(R0,R1,R5);
+
+    multipush(R0,R1,R5);
+    R1=GET_FREE_PAGE;
+    call MOD_2;
+    R10=R0;
+    multipop(R0,R1,R5);
+
+
+    [PROCESS_TABLE+childPID*16]=0;
+    [PROCESS_TABLE+childPID*16+2]=[SYSTEM_STATUS_TABLE+1];
+    [PROCESS_TABLE+childPID*16+3]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+3];
+    [PROCESS_TABLE+childPID*16+6]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+6];
+    [PROCESS_TABLE+childPID*16+7]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+7];
+    [PROCESS_TABLE+childPID*16+9]=0;
+    [PROCESS_TABLE+childPID*16+10]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+10];
+    [PROCESS_TABLE+childPID*16+12]=0;
+    [PROCESS_TABLE+childPID*16+13]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    [PROCESS_TABLE+childPID*16+4]=CREATED;
+    [PROCESS_TABLE+childPID*16+11]=R10;
+
+    alias i R2;
+    i=496;
+    while(i<512) do
+        [[PROCESS_TABLE+childPID*16+11]*512+i]=[[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+i];
+        i=i+1;
+    endwhile;
+
+    i=0;
+    while(i<10) do
+        [DISK_MAP_TABLE+childPID*10+i]=[DISK_MAP_TABLE+[SYSTEM_STATUS_TABLE+1]*10+i];
+        i=i+1;
+    endwhile;
+
+    i=0;
+    while(i<8) do
+        [PAGE_TABLE_BASE+20*childPID+2*i]=[PTBR+2*i];
+        [PAGE_TABLE_BASE+20*childPID+2*i+1]=[PTBR+2*i+1];
+        [MEMORY_FREE_LIST+[PTBR+2*i]]=[MEMORY_FREE_LIST+[PTBR+2*i]]+1;
+        i=i+1;
+    endwhile;
+
+    [PAGE_TABLE_BASE+childPID*20+16]=stack_1;
+    [PAGE_TABLE_BASE+childPID*20+17]=[PAGE_TABLE_BASE+[SYSTEM_STATUS_TABLE+1]*20+17];
+    [PAGE_TABLE_BASE+childPID*20+18]=stack_2;
+    [PAGE_TABLE_BASE+childPID*20+19]=[PAGE_TABLE_BASE+[SYSTEM_STATUS_TABLE+1]*20+19];
+
+    i=0;
+    while(i<512) do
+        [[PAGE_TABLE_BASE+20*childPID+16]*512+i]=[[PTBR+16]*512+i];
+        [[PAGE_TABLE_BASE+20*childPID+18]*512+i]=[[PTBR+18]*512+i];
+        i=i+1;
+    endwhile;
+
+    [[PROCESS_TABLE+childPID*16+11]*512]=BP;
+
+    alias parentSP R3;
+    alias childSP R4;
+    parentSP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    [[PTBR+2*((parentSP-1)/512)]*512+(parentSP-1)%512]=childPID;
+    childSP=[PROCESS_TABLE+childPID*16+13];
+    [[PAGE_TABLE_BASE+childPID*20+2*((childSP-1)/512)]*512+(childSP-1)%512]=0;
+
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    ireturn;
+endif;
+    

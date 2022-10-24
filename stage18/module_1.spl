@@ -3,7 +3,7 @@ alias pid R2;
 if(functionNum==FREE_USER_AREA_PAGE) then
     multipush(R1,R2);
     alias userAreaPage R2;
-    userAreaPage=[SYSTEM_STATUS_TABLE+pid*16+11];
+    userAreaPage=[PROCESS_TABLE+pid*16+11];
     call MOD_2;
     multipop(R1,R2);
 endif;

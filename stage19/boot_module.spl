@@ -1,4 +1,4 @@
-loadi(61,2);
+load(61,2);
 
 loadi(63,13);
 loadi(64,14);
@@ -64,17 +64,6 @@ loadi(45,58);
 // Disk Interrupt Routine;
 loadi(6,19);
 loadi(7,20);
-
-[DISK_MAP_TABLE+10]=-1;
-[DISK_MAP_TABLE+11]=-1;
-[DISK_MAP_TABLE+12]=7;
-[DISK_MAP_TABLE+13]=8;
-[DISK_MAP_TABLE+14]=-1;
-[DISK_MAP_TABLE+15]=-1;
-[DISK_MAP_TABLE+16]=-1;
-[DISK_MAP_TABLE+17]=-1;
-[DISK_MAP_TABLE+18]=-1;
-[DISK_MAP_TABLE+19]=-1;
 
 [DISK_STATUS_TABLE]=0;
 

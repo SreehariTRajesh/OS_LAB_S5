@@ -1,121 +1,62 @@
-print "EXCEPTION HANDLER";
+breakpoint;
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=-1;
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
 SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
 backup;
 multipush(EIP);
-print EIP;
-alias userSP R0;
-userSP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+
 if(EC==0) then
-    print "PAGE FAULT";
-    print "EIP:";
-    print EIP;
-    print "EPN:";
-    print EPN;
-    print "EMA:";
-    print EMA;
-    if(EPN==4 || EPN==5 || EPN==6 || EPN==7) then
-       multipush(R0);
+   if(EPN==2||EPN==3) then
+      R1=GET_FREE_PAGE;
+      call MOD_2;
+      [PTBR+4]=R0;
+      [PTBR+5]="1110";
+      R1=GET_FREE_PAGE;
+      call MOD_2;
+      [PTBR+6]=R0;
+      [PTBR+7]="1110";
+   endif;
+
+   if(EPN==4 || EPN==5 ||EPN==6 || EPN==7) then
+       multipush(R0,R1,R2);
        R1=GET_CODE_PAGE;
        R2=[DISK_MAP_TABLE+[SYSTEM_STATUS_TABLE+1]*10+EPN];
        call MOD_2;
-       [PTBR+EPN*2]=R0;
-       [PTBR+EPN*2+1]="1100";
-       multipop(R0);
-    endif;
-    if(EPN==2 || EPN==3) then
-       multipush(R0);
-       R1=GET_FREE_PAGE;
-       call MOD_2;
-       [PTBR+4]=R0;
-       [PTBR+5]="1110";
-       multipop(R0);
-       multipush(R0);
-       R1=GET_FREE_PAGE;
-       call MOD_2;
-       [PTBR+6]=R0;
-       [PTBR+7]="1110";
-       multipop(R0);
-    endif;
+       [PTBR+2*EPN]=R0;
+       [PTBR+2*EPN+1]="1100";
+       multipop(R0,R1,R2);
+       breakpoint;
+   endif;
 endif;
 
-if(userSP==PTLR*512-1) then
-    print "STACK OVERFLOW";
-    print "EIP:";
-    print EIP;
-    print "EPN:";
-    print EPN;
-    print "EMA:";
-    print EMA;
-    multipush(R0,R1,R2,R3);
-    R1=EXIT_PROCESS;
-    R2=[SYSTEM_STATUS_TABLE+1];
-    call MOD_1;
-    multipop(R0,R1,R2,R3);
-    multipush(R0,R1,R2,R3);
-    call MOD_5;
-    multipop(R0,R1,R2,R3);
+if([PROCESS_TABLE+[SYSTEM_STATUS_TABLE]*16+13]==PTLR*512-1) then
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   call MOD_5;
 endif;
 
-if(EC!=0) then
-    if(EC==1) then
-        print "illegal instr";
-        print "EIP:";
-        print EIP;
-        print "EPN:";
-        print EPN;
-        print "EMA:";
-        print EMA;
-    endif;
-    if(EC==2) then
-        breakpoint;
-        print "illegal mem";
-        print "EIP:";
-        print EIP;
-        print "EPN:";
-        print EPN;
-        print "EMA:";
-        print EMA;
-    endif;
-    multipush(R0,R1,R2,R3);
-    R1=EXIT_PROCESS;
-    R2=[SYSTEM_STATUS_TABLE+1];
-    call MOD_1;
-    multipop(R0,R1,R2,R3);
-    print "PROCESS EXITED";
-    call MOD_5;
+if(EC==1) then
+   print "ILL.INSTR";
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   call MOD_5;
 endif;
+
+if(EC==2) then
+   print "ILL.MEM";
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   call MOD_5;
+endif;
+
 
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
 multipop(EIP);
-print EIP;
 restore;
 SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
-breakpoint;
-
-print "Page Table:";
-print [PTBR+0];
-print [PTBR+2];
-print [PTBR+4];
-print [PTBR+6];
-print [PTBR+8];
-print [PTBR+10];
-print [PTBR+12];
-print [PTBR+14];
-print [PTBR+16];
-print [PTBR+18];
-
-multipush(R0);
-print "before store";
-userSP=SP;
-print userSP;
-userSP=userSP+1;
-print [PTBR+2*(userSP/512)]*512+(userSP%512);
-print [PTBR+2*(userSP/512)];
-[[PTBR+2*(userSP/512)]*512+(userSP%512)]=EIP;
-SP=userSP;
-print "after store:";
-print userSP;
-multipop(R0);
+SP=SP+1;
+[[PTBR+(SP/512)*2]*512+SP%512]=EIP;
 ireturn;

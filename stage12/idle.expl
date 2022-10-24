@@ -7,7 +7,6 @@ int main(){
         w="idle";
         while(1==1) do
             a=1;
-            t=exposcall("Write",-2,w);
         endwhile;
         return 0;
     end

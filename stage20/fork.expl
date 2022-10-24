@@ -1,0 +1,14 @@
+int main(){
+    decl
+        int temp,pid1,pid2,pid3;
+    enddecl
+    begin
+        pid1=exposcall("Fork");
+        pid2=exposcall("Fork");
+        pid3=exposcall("Fork");
+        write(pid1);
+        write(pid2);
+        write(pid3);
+        return 0;
+    end
+}

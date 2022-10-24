@@ -1,0 +1,42 @@
+type
+  List{
+    int data;
+    List next;
+  }
+endtype
+
+int main(){
+  decl
+    List head,tail,ptr;
+    int N,x,junk;
+    str msg;
+  enddecl
+  begin
+    x=initialize();
+    junk=exposcall("Read",-1,N);
+    head=null;
+    tail=null;
+    while(N>0) do
+      junk=exposcall("Read",-1,x);
+      ptr=alloc();
+      ptr.data=x;
+      ptr.next=null;
+      if(head==null) then
+         head=ptr;
+         tail=ptr;
+      else
+         tail.next=ptr;
+         tail=tail.next;
+      endif;
+      N=N-1;
+    endwhile;
+    msg="Finished Read:";
+    junk=exposcall("Write",-2,msg);
+    while(head!=null) do
+      x=head.data;
+      junk=exposcall("Write",-2,x);
+      head=head.next;
+    endwhile;
+    return 0;
+  end
+}

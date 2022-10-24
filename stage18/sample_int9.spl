@@ -86,12 +86,6 @@ call MOD_2;
 multipop(R0,R1,R2,R3);
 
 alias i R8;
-i=0;
-print "INODE TABLE";
-while(i<16) do
-    print [INODE_TABLE+index*16+i];
-    i=i+1;
-endwhile;
 
 //Load Code Blocks from Disk 
 
@@ -118,17 +112,6 @@ while(i<12) do
     multipop(R8,R3);
     i=i+1;
 endwhile;
-
-print [PTBR+0];
-print [PTBR+2];
-print [PTBR+4];
-print [PTBR+6];
-print [PTBR+8];
-print [PTBR+10];
-print [PTBR+12];
-print [PTBR+14];
-print [PTBR+16];
-print [PTBR+18];
 
 [[PTBR+16]*512]=[[PTBR+8]*512+1];
 SP=8*512;

@@ -1,14 +1,12 @@
 int main(){
     decl
       str prog;
-      int t;
-      str w;
+      int t,w;
     enddecl
     begin
-      w="HELLO WOrld";
-      t=exposcall("Write",-2,w);
+      w=-1;
       t=exposcall("Read",-1,prog);
-      breakpoint;
+      t=exposcall("Write",-2,w);
       t=exposcall("Exec",prog);
       return 0;
     end

@@ -30,20 +30,21 @@ if(fNum==TERMINAL_READ) then
 endif;
 
 if(fNum==DISK_LOAD) then
-    multipush(R0,R1,R2,R3,R4);
+    multipush(R1,R2,R3);
     R1=ACQUIRE_DISK;
     R2=currPID;
     call MOD_0;
-    multipop(R0,R1,R2,R3,R4);
+    multipop(R1,R2,R3);
     [DISK_STATUS_TABLE+1]=0;
     [DISK_STATUS_TABLE+2]=R3;
     [DISK_STATUS_TABLE+3]=R4;
     load(R3,R4);
     [PROCESS_TABLE+currPID*16+4]=WAIT_DISK;
     multipush(R0,R1,R2,R3,R4);
-    print "CALL SCHEDULER";
     call MOD_5;
+    breakpoint;
     multipop(R0,R1,R2,R3,R4);
+    breakpoint;
 endif;
 
 return;

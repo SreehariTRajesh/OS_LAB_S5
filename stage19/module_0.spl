@@ -30,7 +30,6 @@ if(fNum==RELEASE_TERMINAL) then
         R0=0;
         return;
     endif;
-    print "Terminal Released";
 endif;
 
 if(fNum==ACQUIRE_DISK) then

@@ -1,0 +1,68 @@
+MOV R16, "Shut Down"
+PORT P1, R16
+OUT
+MOV R16, "     o|* *|o"
+PORT P1, R16
+OUT
+MOV R16, "     o|* *|o"
+PORT P1, R16
+OUT
+MOV R16, "     o|* *|o"
+PORT P1, R16
+OUT
+MOV R16, "      \===/"
+PORT P1, R16
+OUT
+MOV R16, "       |||"
+PORT P1, R16
+OUT
+MOV R16, "       |||"
+PORT P1, R16
+OUT
+MOV R16, "       |||"
+PORT P1, R16
+OUT
+MOV R16, "       |||"
+PORT P1, R16
+OUT
+MOV R16, "    ___|||___"
+PORT P1, R16
+OUT
+MOV R16, "   /   |||   \\"
+PORT P1, R16
+OUT
+MOV R16, "  /    |||    \\"
+PORT P1, R16
+OUT
+MOV R16, " |     |||     |"
+PORT P1, R16
+OUT
+MOV R16, "  \   (|||)   /"
+PORT P1, R16
+OUT
+MOV R16, "   |   |||   |"
+PORT P1, R16
+OUT
+MOV R16, "  /    |||    \\"
+PORT P1, R16
+OUT
+MOV R16, " /     |||     \\"
+PORT P1, R16
+OUT
+MOV R16, "/      |||      \\"
+PORT P1, R16
+OUT
+MOV R16, "|     [===]     |"
+PORT P1, R16
+OUT
+MOV R16, " \             /"
+PORT P1, R16
+OUT
+MOV R16, "  '.         .'"
+PORT P1, R16
+OUT
+MOV R16, "    '-------'"
+PORT P1, R16
+OUT
+HALT
+HALT

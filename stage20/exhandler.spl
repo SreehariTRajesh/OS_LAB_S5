@@ -1,0 +1,78 @@
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=-1;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+backup;
+multipush(EIP);
+
+print "EXCEPTION:";
+print "EIP:";
+print EIP;
+print "EPN:";
+print EPN;
+print "EC:";
+print EC;
+print "EMA:";
+print EMA;
+
+if(EC==0) then
+   if(EPN==2||EPN==3) then
+      R1=GET_FREE_PAGE;
+      call MOD_2;
+      [PTBR+4]=R0;
+      [PTBR+5]="1110";
+      R1=GET_FREE_PAGE;
+      call MOD_2;
+      [PTBR+6]=R0;
+      [PTBR+7]="1110";
+   endif;
+
+   if(EPN==4 || EPN==5 ||EPN==6 || EPN==7) then
+       multipush(R0,R1,R2);
+       R1=GET_CODE_PAGE;
+       R2=[DISK_MAP_TABLE+[SYSTEM_STATUS_TABLE+1]*10+EPN];
+       call MOD_2;
+       [PTBR+2*EPN]=R0;
+       [PTBR+2*EPN+1]="1100";
+       multipop(R0,R1,R2);
+       breakpoint;
+   endif;
+endif;
+
+if([PROCESS_TABLE+[SYSTEM_STATUS_TABLE]*16+13]==PTLR*512-1) then
+   multipush(R0,R1,R2);
+   print "FULLSTACK";
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   multipop(R0,R1,R2);
+   call MOD_5;
+endif;
+
+if(EC==1) then
+   print "ILL.INSTR";
+   multipush(R1,R2);
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   multipop(R1,R2);
+   call MOD_5;
+endif;
+
+if(EC==2) then
+   print "ILL.MEM";
+   multipush(R1,R2);
+   R1=EXIT_PROCESS;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_1;
+   multipop(R1,R2);
+   call MOD_5;
+endif;
+
+
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+multipop(EIP);
+restore;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+SP=SP+1;
+[[PTBR+(SP/512)*2]*512+SP%512]=EIP;
+ireturn;

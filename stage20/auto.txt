@@ -1,0 +1,2 @@
+load --init ../stage20/fork.xsm
+run ../stage20/runfile

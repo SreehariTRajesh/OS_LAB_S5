@@ -72,9 +72,6 @@ _L10:
 MOV R0, 0
 RET
 _L8:
-MOV R16, "Terminal Released"
-PORT P1, R16
-OUT
 JMP _L6
 _L5:
 _L6:

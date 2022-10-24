@@ -1,46 +1,42 @@
 type
-node{
+  List{
     int data;
-    node next;
-}
+    List next;
+  }
 endtype
+
 int main(){
-    decl 
-        int N,junk,i,j,x;
-        node head,ptr,t;
-        str p;
-    enddecl
-    begin
-        p="heap initialzed";
-        i=0;
-        junk=initialize();
-        junk=exposcall("Read",-1,p);
-        junk=exposcall("Read",-1,N);
-        while(i<N) do
-            junk=exposcall("Read",-1,x);
-            if(i==0) then
-               head=alloc();
-               head.data=x;
-            else 
-                ptr=head;
-                j=0;
-                while(j<i) do
-                    ptr=ptr.next;
-                    j=j+1;
-                endwhile;
-                t=alloc();
-                t.data=x;
-                ptr.next=t;
-            endif;
-            i=i+1;
-        endwhile;
-        p="Print List:";
-        junk=exposcall("Write",-1,p);
-        while(i>0) do
-            junk=exposcall("Write",-2,head.data);
-            head=head.next;
-            i=i-1;
-        endwhile;
-        return 0;
-    end
+  decl
+    List head,tail,ptr;
+    int N,x,junk;
+    str msg;
+  enddecl
+  begin
+    x=initialize();
+    junk=exposcall("Read",-1,N);
+    head=null;
+    tail=null;
+    while(N>0) do
+      junk=exposcall("Read",-1,x);
+      ptr=alloc();
+      ptr.data=x;
+      ptr.next=null;
+      if(head==null) then
+         head=ptr;
+         tail=ptr;
+      else
+         tail.next=ptr;
+         tail=tail.next;
+      endif;
+      N=N-1;
+    endwhile;
+    msg="Finished Read:";
+    junk=exposcall("Write",-2,msg);
+    while(head!=null) do
+      x=head.data;
+      junk=exposcall("Write",-2,x);
+      head=head.next;
+    endwhile;
+    return 0;
+  end
 }
