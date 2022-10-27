@@ -1,0 +1,107 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+
+alias syscallPhysicalAddr R1;
+syscallPhysicalAddr=[[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512];
+alias fileName R2;
+fileName=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+if([syscallPhysicalAddr]==1) then
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    alias index R3;
+    index=0;
+    while(index<60) do
+        if([INODE_TABLE+index*16+1]==fileName) then
+            [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+            [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+            SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+            ireturn;
+        endif;
+        index=index+1;
+    endwhile;
+    index=0;
+    while(index<60) do
+        if([INODE_TABLE+index*16+1]==-1) then
+            break;
+        endif;
+        index=index+1;
+    endwhile;
+    if(index==60) then
+        [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn;
+    endif;
+    // File Type;
+    [INODE_TABLE+index*16+0]=DATA;
+    [INODE_TABLE+index*16+1]=fileName;
+    [INODE_TABLE+index*16+2]=0;
+    [INODE_TABLE+index*16+3]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+3];
+    [INODE_TABLE+index*16+8]=-1;
+    [INODE_TABLE+index*16+9]=-1;
+    [INODE_TABLE+index*16+10]=-1;
+    [INODE_TABLE+index*16+11]=-1;
+
+    [INODE_TABLE+0]=DATA;
+    [INODE_TABLE+1]="root";
+    [INODE_TABLE+2]=512;
+    [INODE_TABLE+3]=0
+    [INODE_TABLE+4]=0;
+
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+    ireturn;
+endif;
+
+if([syscallPhysicalAddr]==4) then
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=4;
+    alias index R3;
+    index=0;
+    while(index<60) do
+        if([INODE_TABLE+index*16+1]==fileName) then
+            break;
+        endif;
+        index=index+1;
+    endwhile;
+    if(index==60) then
+        [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn;
+    endif;
+    if([INODE_TABLE+index*16+0]!=DATA) then
+        [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn;    
+    endif;
+    if([INODE_TABLE+index*16+3]!=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+3]) then
+       [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+       [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+       SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+       ireturn;
+    endif;
+
+    multipush(R0,R1,R2,R3);
+    R1=ACQUIRE_INODE;
+    R2=index;
+    R3=[SYSTEM_STATUS_TABLE+1];
+    call MOD_0;
+    multipop(R0,R1,R2,R3);
+
+    if([FILE_STATUS_TABLE+index*4+1]!=-1) then   
+        multipush(R0,R1,R2,R3);
+        R1=ACQUIRE_INODE;
+        R2=index;
+        R3=[SYSTEM_STATUS_TABLE+1];
+        call MOD_0;
+        multipop(R0,R1,R2,R3);
+        [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn;
+    endif;
+        
+endif;

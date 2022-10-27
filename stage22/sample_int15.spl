@@ -1,0 +1,6 @@
+print "Context Switch:";
+print R13;
+print "Disk Access:";
+print R15;
+print "Shut Down";
+halt;
