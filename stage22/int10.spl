@@ -1,12 +1,6 @@
-
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=10;
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
 SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
-
-print "context switch:";
-print R13;
-print "disk access:";
-print R15;
 
 multipush(R1,R2);
 R1=EXIT_PROCESS;
@@ -14,6 +8,7 @@ R2=[SYSTEM_STATUS_TABLE+1];
 call MOD_1;
 multipop(R1,R2);
 
-R13=R13+1;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=TERMINATED;
+
 call MOD_5;
 

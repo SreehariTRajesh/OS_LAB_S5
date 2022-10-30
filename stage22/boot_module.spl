@@ -114,7 +114,7 @@ loadi(31,44);
 [[PROCESS_TABLE+27]*512+510]=-1;
 [[PROCESS_TABLE+27]*512+511]=-1;
 
-alias idx R0;
+alias idx R10;
 idx=0;
 while(idx<128) do
     [MEMORY_FREE_LIST+idx]=0;

@@ -1,0 +1,1191 @@
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Successful
+Unix-XFS Interace Version 2.0. 
+Type "help" for getting a list of commands.
+# rm con.xsm
+# load --exec ../stage22/con.xsm
+# run ../stage22/runfile
+shell@:~$
+new process
+0
+new process
+1
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+int14 x
+syscall 19
+new process
+0
+new process
+2
+new process
+0
+new process
+2
+int14 x
+syscall 20
+int14 x
+syscall 19
+scheduler
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new process
+0
+new proce

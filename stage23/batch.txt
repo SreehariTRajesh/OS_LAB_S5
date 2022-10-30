@@ -1,3 +1,1 @@
-rm con.xsm
-load --exec ../stage22/con.xsm
-run ../stage22/runfile
+run ../stage23/runfile

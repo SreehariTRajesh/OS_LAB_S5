@@ -3,7 +3,6 @@ alias currPID R2;
 if(fNum==ACQUIRE_TERMINAL) then
     while([TERMINAL_STATUS_TABLE]==1) do
         [PROCESS_TABLE+currPID*16+4]=WAIT_TERMINAL;    
-        R13=R13+1;
         backup;
         call MOD_5;
         restore;
@@ -64,12 +63,13 @@ endif;
 if(fNum==RELEASE_SEMAPHORE) then
     [SEMAPHORE_TABLE+R2*4+0]=-1;
     alias i R3;
-    i=0;
+    i=2;
     while(i<16) do
         if([PROCESS_TABLE+i*16+4]==WAIT_SEMAPHORE && [PROCESS_TABLE+i*16+5]==R2) then
            [PROCESS_TABLE+i*16+4]=READY;
         endif;
+        i=i+1;
     endwhile;   
-    [SEMAPHORE_TABLE+i*4+1]=[SEMAPHORE_TABLE+i*4+1]-1;
+    [SEMAPHORE_TABLE+R2*4+1]=[SEMAPHORE_TABLE+R2*4+1]-1;
     return;
 endif;

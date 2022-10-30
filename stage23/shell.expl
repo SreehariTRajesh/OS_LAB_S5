@@ -28,6 +28,7 @@ begin
                 endif;
             endif;
         else
+            write("shutting down");
             temp = exposcall("Shutdown");
             break;
         endif;

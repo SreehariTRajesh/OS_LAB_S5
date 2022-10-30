@@ -8,10 +8,6 @@ alias childPID R2;
 multipush(R0,R1,R2);
 R1=GET_PCB_ENTRY;
 call MOD_1;
-if(R0==-1) then
-    print [SYSTEM_STATUS_TABLE+1];
-    print "PCB FULL";
-endif;
 R10=R0;
 multipop(R0,R1,R2);
 childPID=R10;
@@ -54,6 +50,7 @@ call MOD_2;
 [R10+17]="0110";
 multipop(R0,R1,R2,R3,R4,R5);
 
+
 R10=R3;
 multipush(R0,R1,R2,R3,R4,R5);
 R1=GET_FREE_PAGE;
@@ -61,6 +58,7 @@ call MOD_2;
 [R10+18]=R0;
 [R10+19]="0110";
 multipop(R0,R1,R2,R3,R4,R5);
+
 
 R10=R4;
 multipush(R0,R1,R2,R3,R4,R5);

@@ -63,6 +63,7 @@ List mergeSort(List top)
 
         //If Fork is not possible, do sequential
         if(pid==-1) then
+          write("X");
           a=mergeSort(a);
           b=mergeSort(b);
         else
@@ -139,7 +140,7 @@ int main()
     //Storing values in descending order
     head=null;
     counter=0;
-    while(counter<32) do
+    while(counter<64) do
       p=alloc();
       p.data=64-counter;
       p.next=null;
@@ -153,12 +154,6 @@ int main()
       endif;
 
       counter=counter+1;
-    endwhile;
-
-    p=head;
-    while(p!=null) do
-      write(p.data);
-      p=p.next;
     endwhile;
 
     //Calling Merge Sort

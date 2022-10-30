@@ -63,6 +63,7 @@ List mergeSort(List top)
 
         //If Fork is not possible, do sequential
         if(pid==-1) then
+          write("X");
           a=mergeSort(a);
           b=mergeSort(b);
         else

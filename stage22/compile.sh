@@ -34,6 +34,6 @@ echo "Successful"
 echo "Successful"
 ./spl ../stage22/sample_int15.spl
 echo "Successful"
-./spl ../stage22/sample_int13.spl
+./spl ../stage22/sample_int13_copy.spl
 echo "Successful"
-./spl ../stage22/sample_int14.spl
+./spl ../stage22/sample_int14_copy.spl

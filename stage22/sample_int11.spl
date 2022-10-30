@@ -34,7 +34,6 @@ if(syscallPhysicalAddr==13) then
     else
         [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=WAIT_PROCESS;
         [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+5]=pid;    
-        R13=R13+1;
         backup;
         call MOD_5;
         restore;    
@@ -49,14 +48,15 @@ if(syscallPhysicalAddr==14) then
     alias pid R2;
     pid=[[PTBR+2*((userSP-3)/512)]*512+(userSP-3)%512];
     alias i R3;
-    i=0;
+    i=2;
     while(i<16) do
         if([PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*6+4]==WAIT_PROCESS && [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+5]==pid) then
             [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=READY;
         endif; 
         i=i+1;
     endwhile;
-    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=0;
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
     [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
     ireturn;
 endif;

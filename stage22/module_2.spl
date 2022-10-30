@@ -6,11 +6,10 @@ if(functionNum==GET_FREE_PAGE) then
         [SYSTEM_STATUS_TABLE+3]=[SYSTEM_STATUS_TABLE+3]+1;
     endif;
     while([SYSTEM_STATUS_TABLE+2]==0) do
-        [PROCESS_TABLE+arg2*16+4]=WAIT_MEM;
-        R13=R13+1;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=WAIT_MEM;
         backup;
         call MOD_5;
-        restore;   
+        restore;
     endwhile;
     [SYSTEM_STATUS_TABLE+3]=[SYSTEM_STATUS_TABLE+3]-1;
     [SYSTEM_STATUS_TABLE+2]=[SYSTEM_STATUS_TABLE+2]-1;
@@ -24,6 +23,8 @@ if(functionNum==GET_FREE_PAGE) then
         endif;
         page_no=page_no+1;
     endwhile;
+    R0=-1;
+    return;
 endif;
 
 if(functionNum==RELEASE_PAGE) then
@@ -33,7 +34,7 @@ if(functionNum==RELEASE_PAGE) then
     endif;
     multipush(R3);
     alias pid R3;
-    pid=0;
+    pid=2;
     while(pid<16) do
         if([PROCESS_TABLE+pid*16+4]==WAIT_MEM) then
             [PROCESS_TABLE+pid*16+4]=READY;
@@ -51,21 +52,25 @@ if(functionNum==GET_CODE_PAGE) then
             if([DISK_MAP_TABLE+i*10+4]==R2 && [PAGE_TABLE_BASE+i*20+8]!=-1) then
                 R0=[PAGE_TABLE_BASE+i*20+8];
                 [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]+1;
+                return;
                 break;
             endif;
             if([DISK_MAP_TABLE+i*10+5]==R2 && [PAGE_TABLE_BASE+i*20+10]!=-1) then
                 R0=[PAGE_TABLE_BASE+i*20+10];
-                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]+1;
+                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+10]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+10]]+1;
+                return;
                 break;
             endif;
             if([DISK_MAP_TABLE+i*10+6]==R2 && [PAGE_TABLE_BASE+i*20+12]!=-1) then
                 R0=[PAGE_TABLE_BASE+i*20+12];
-                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]+1;
+                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+12]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+12]]+1;
+                return;
                 break;
             endif;
             if([DISK_MAP_TABLE+i*10+7]==R2 && [PAGE_TABLE_BASE+i*20+14]!=-1) then
                 R0=[PAGE_TABLE_BASE+i*20+14];
-                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+8]]+1;
+                [MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+14]]=[MEMORY_FREE_LIST+[PAGE_TABLE_BASE+i*20+14]]+1;
+                return;
                 break;
             endif;
             i=i+1;

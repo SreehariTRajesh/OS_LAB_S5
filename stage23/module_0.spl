@@ -2,7 +2,7 @@ alias fNum R1;
 alias currPID R2;
 if(fNum==ACQUIRE_TERMINAL) then
     while([TERMINAL_STATUS_TABLE]==1) do
-        [PROCESS_TABLE+currPID*16+4]=WAIT_TERMINAL;
+        [PROCESS_TABLE+currPID*16+4]=WAIT_TERMINAL;    
         backup;
         call MOD_5;
         restore;
@@ -34,6 +34,7 @@ endif;
 if(fNum==ACQUIRE_DISK) then
     while([DISK_STATUS_TABLE]==1) do
         [PROCESS_TABLE+currPID*16+4]=WAIT_DISK;
+        R13=R13+1;
         backup;
         call MOD_5;
         restore;
@@ -48,7 +49,7 @@ if(fNum==ACQUIRE_SEMAPHORE) then
     i=0;
     while(i<MAX_SEM_COUNT) do
         if([SEMAPHORE_TABLE+i*4+1]==0) then
-            [SEMAPHORE_TABLE+i*4+0]=currPID;
+            [SEMAPHORE_TABLE+i*4+0]=-1;
             [SEMAPHORE_TABLE+i*4+1]=1;
             R0=i;
             return;
@@ -62,12 +63,49 @@ endif;
 if(fNum==RELEASE_SEMAPHORE) then
     [SEMAPHORE_TABLE+R2*4+0]=-1;
     alias i R3;
-    i=0;
+    i=2;
     while(i<16) do
         if([PROCESS_TABLE+i*16+4]==WAIT_SEMAPHORE && [PROCESS_TABLE+i*16+5]==R2) then
            [PROCESS_TABLE+i*16+4]=READY;
         endif;
+        i=i+1;
     endwhile;   
-    [SEMAPHORE_TABLE+i*4+1]=[SEMAPHORE_TABLE+i*4+1]-1;
+    [SEMAPHORE_TABLE+R2*4+1]=[SEMAPHORE_TABLE+R2*4+1]-1;
+    return;
+endif;
+
+if(fNum==ACQUIRE_INODE) then
+    while([FILE_STATUS_TABLE+4*R2]!=-1) do
+        [PROCESS_TABLE+R3*16+4]=WAIT_FILE;
+        [PROCESS_TABLE+R3*16+5]=R2;
+        backup;
+        call MOD_5;
+        restore;
+    endwhile;
+
+    if([FILE_STATUS_TABLE+R2*4+1]==-1) then
+        R0=-1;
+        return;
+    endif;
+    [FILE_STATUS_TABLE+R2*4]=R3;
+    R0=0;
+    return;
+endif;
+
+if(fNum==RELEASE_INODE) then
+    if(R3!=[FILE_STATUS_TABLE+R2*4]) then
+       R0=-1;
+       return;
+    endif;
+    [FILE_STATUS_TABLE+R2*4]=-1;
+    alias i R4;
+    i=0;
+    while(i<16) do
+        if([PROCESS_TABLE+i*16+4]==WAIT_FILE && [PROCESS_TABLE+i*16+5]==R2) then
+            [PROCESS_TABLE+i*16+4]=READY;
+        endif;  
+        i=i+1;
+    endwhile;
+    R0=0;
     return;
 endif;

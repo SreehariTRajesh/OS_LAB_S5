@@ -1,3 +1,10 @@
+alias context_switch R13;
+alias mem_usage R14;
+alias disk_access R15;
+context_switch=0;
+disk_access=0;
+mem_usage=0;
+
 // Disk Free List
 loadi(61,2);
 
@@ -88,6 +95,11 @@ loadi(29,42);
 loadi(30,43);
 loadi(31,44);
 
+//Routine 4;
+loadi(10,23);
+loadi(11,24);
+
+
 [DISK_STATUS_TABLE]=0;
 
 [[PROCESS_TABLE+27]*512+496]=-1;
@@ -107,7 +119,7 @@ loadi(31,44);
 [[PROCESS_TABLE+27]*512+510]=-1;
 [[PROCESS_TABLE+27]*512+511]=-1;
 
-alias idx R0;
+alias idx R10;
 idx=0;
 while(idx<128) do
     [MEMORY_FREE_LIST+idx]=0;
@@ -118,6 +130,21 @@ idx=0;
 while(idx<32) do
     [SEMAPHORE_TABLE+4*idx+0]=-1;
     [SEMAPHORE_TABLE+4*idx+1]= 0;
+    idx=idx+1;
+endwhile;
+
+idx=0;
+while(idx<60) do
+    [FILE_STATUS_TABLE+idx*4]=-1;
+    [FILE_STATUS_TABLE+idx*4+1]=-1;
+    idx=idx+1;
+endwhile;
+
+idx=0;
+while(idx<MAX_BUFFER) do
+    [BUFFER_TABLE+idx*4]=-1;
+    [BUFFER_TABLE+idx*4+1]=0;
+    [BUFFER_TABLE+idx*4+2]=-1;
     idx=idx+1;
 endwhile;
 
@@ -169,6 +196,7 @@ PTBR=PAGE_TABLE_BASE+20;
 PTLR=10;
 
 [PROCESS_TABLE+27]=80;
+[PROCESS_TABLE+19]=1;
 [PROCESS_TABLE+17]=1;
 [PROCESS_TABLE+20]=CREATED;
 [PROCESS_TABLE+29]=8*512;
@@ -202,19 +230,10 @@ PTLR=10;
 
 [76*512]=[65*512+1];
 
-[PROCESS_TABLE+36]=TERMINATED;
-[PROCESS_TABLE+52]=TERMINATED;
-[PROCESS_TABLE+68]=TERMINATED;
-[PROCESS_TABLE+84]=TERMINATED;
-[PROCESS_TABLE+100]=TERMINATED;
-[PROCESS_TABLE+116]=TERMINATED;
-[PROCESS_TABLE+132]=TERMINATED;
-[PROCESS_TABLE+148]=TERMINATED;
-[PROCESS_TABLE+164]=TERMINATED;
-[PROCESS_TABLE+180]=TERMINATED;
-[PROCESS_TABLE+196]=TERMINATED;
-[PROCESS_TABLE+212]=TERMINATED;
-[PROCESS_TABLE+228]=TERMINATED;
-[PROCESS_TABLE+244]=TERMINATED;
+idx=36;
+while(idx<245) do
+    [PROCESS_TABLE+idx]=TERMINATED;
+    idx=idx+16;
+endwhile;
 
 return;
