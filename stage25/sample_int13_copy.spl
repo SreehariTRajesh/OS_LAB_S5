@@ -1,0 +1,83 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+
+alias syscallPhyscialAddress R1;
+alias systemCall R2;
+syscallPhyscialAddress=[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512;
+
+systemCall=[syscallPhyscialAddress];
+if(systemCall==17) then
+   print "semget";
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=17;
+   alias i R3;
+   i=0;
+   while(i<8) do
+        if([[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]==-1) then
+           [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]=SEMAPHORE;
+           break;
+        endif;
+        i=i+1;
+   endwhile;
+   if(i==8) then
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+      ireturn;
+   endif;
+
+   multipush(R0,R1,R2,R3);
+   R1=ACQUIRE_SEMAPHORE;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_0;
+   R10=R0;
+   multipop(R0,R1,R2,R3);
+
+   if(R10==-1) then
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-2;
+      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+      [[PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 11]*512+496+2*i] = -1;
+      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+      ireturn;   
+   endif;
+
+   [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]=SEMAPHORE;
+   [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+497]=R10;
+   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=i;
+   SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+   ireturn;
+endif;
+
+if(systemCall==18) then
+   print "semrelease";
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=18;
+   alias semaphoreDesc R3;
+   semaphoreDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+   if((semaphoreDesc>7 || semaphoreDesc<0) || [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*semaphoreDesc+496]==1) then
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+      ireturn;
+   endif;
+
+   multipush(R0,R1,R2,R3);
+   R1=RELEASE_SEMAPHORE;
+   R2=[[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+497+2*semaphoreDesc];
+   R3=[SYSTEM_STATUS_TABLE+1];
+   call MOD_0;
+   multipop(R0,R1,R2,R3);
+   
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+496+2*semaphoreDesc]=-1;
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+497+2*semaphoreDesc]=-1;
+
+   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+   SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+   ireturn;
+endif;
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 9] = 0;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
+ireturn;

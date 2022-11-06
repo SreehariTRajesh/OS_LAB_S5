@@ -1,0 +1,19 @@
+int main(){
+    decl
+        int w,a,fdesc,j;
+    enddecl
+    begin
+        w=0;
+        fdesc=exposcall("Open","numbers.dat");
+        a=0;
+        write(fdesc);
+        while(a!=-2) do
+            a=exposcall("Read",fdesc,w);
+            if(a==-2) then
+               break;
+            endif;
+            j=exposcall("Write",-2,w);
+        endwhile;
+        return 0;
+    end
+}

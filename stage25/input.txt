@@ -1,0 +1,5 @@
+ls
+cp
+numbers.dat
+x.dat
+^C

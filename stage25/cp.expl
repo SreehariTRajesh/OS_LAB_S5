@@ -1,0 +1,26 @@
+int main(){
+    decl
+        str file1,file2;
+        int fdesc1,fdesc2,junk;
+        str dat;
+    enddecl
+    begin
+        junk=exposcall("Read",-1,file1);
+        junk=exposcall("Read",-1,file2);
+        fdesc1=exposcall("Open",file1);
+        fdesc2=exposcall("Open",file2);
+        if(fdesc1==-1) then
+           write("File not found");
+           junk=exposcall("Exit");
+        endif;
+        if(fdesc2==-1) then
+            junk=exposcall("Create",file2,1);
+            fdesc2=exposcall("Open",file2);
+        endif;
+        while(fdesc1!=-2) do
+            fdesc1=exposcall("Read",fdesc1,dat);
+            junk=exposcall("Write",fdesc2,dat);
+        endwhile;
+        return 0;
+    end
+}

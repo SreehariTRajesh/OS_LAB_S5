@@ -1,0 +1,5 @@
+rm assg2.xsm
+load --exec ../stage24/assg2.xsm
+rm read.xsm
+load --exec ../stage24/read.xsm
+run ../stage24/runfile

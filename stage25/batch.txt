@@ -1,0 +1,11 @@
+rm write.xsm
+load --exec ../stage25/write.xsm
+rm ls.xsm
+load --exec ../stage25/ls.xsm
+rm cp.xsm
+load --exec ../stage25/cp.xsm
+rm read.xsm
+rm assg1.xsm
+load --exec ../stage25/assignment/assg1.xsm
+load --exec ../stage25/read.xsm
+run ../stage25/runfile

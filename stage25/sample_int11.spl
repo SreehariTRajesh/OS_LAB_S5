@@ -1,0 +1,73 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+
+alias syscallPhysicalAddr R1;
+syscallPhysicalAddr=[[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512];
+
+if(syscallPhysicalAddr==11) then
+    alias retvalPhysicalAddr R2;
+    retvalPhysicalAddr=[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512;
+    [retvalPhysicalAddr]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+1];
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    ireturn;
+endif;
+
+if(syscallPhysicalAddr==12) then
+    alias retvalPhysicalAddr R2;
+    retvalPhysicalAddr=[[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512];
+    [retvalPhysicalAddr]=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+2];
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    ireturn;
+endif;
+
+if(syscallPhysicalAddr==13) then
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=13;
+    alias pid R2;
+    pid=[[PTBR+2*((userSP-3)/512)]*512+(userSP-3)%512];
+    if([PROCESS_TABLE+pid*16+4]==TERMINATED || [SYSTEM_STATUS_TABLE+1]==pid || (pid>=16 && pid<0)) then
+        [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;   
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn; 
+    else
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=WAIT_PROCESS;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+5]=pid;    
+        print "process:";
+        print [SYSTEM_STATUS_TABLE+1];
+        print "waiting for";
+        print pid;
+        print "process:";
+        print pid;
+        print "in WAIT_FILE";
+        print "inode_index:";
+        print [INODE_TABLE+[PROCESS_TABLE+pid*16+5]*16+1];
+        print "locked by";
+        print [FILE_STATUS_TABLE+[PROCESS_TABLE+pid*16+5]*4];
+        backup;
+        call MOD_5;
+        restore;
+        [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;   
+        SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+        ireturn;
+    endif;
+endif;
+
+if(syscallPhysicalAddr==14) then
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=14;
+    alias pid R2;
+    pid=[[PTBR+2*((userSP-3)/512)]*512+(userSP-3)%512];
+    alias i R3;
+    i=2;
+    while(i<16) do
+        if([PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*6+4]==WAIT_PROCESS && [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+5]==pid) then
+            [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=READY;
+        endif; 
+        i=i+1;
+    endwhile;
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+    SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+    ireturn;
+endif;

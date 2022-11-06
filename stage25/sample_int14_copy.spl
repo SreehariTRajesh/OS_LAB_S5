@@ -1,0 +1,84 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+
+alias syscallPhyscialAddress R1;
+alias systemCall R2;
+syscallPhyscialAddress=[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512;
+alias pte R3;
+pte=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+systemCall=[syscallPhyscialAddress];
+if(systemCall==19) then
+   print "Semlock";
+   [pte+9]=19;
+   alias semDesc R4;
+   semDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+   if(semDesc<0 || semDesc>7 || [[pte+11]*512+496+2*semDesc]!=SEMAPHORE) then 
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [pte+9]=0;
+      SP=[pte+13];
+      ireturn;
+   endif;
+   
+   alias openSemIndex R5;
+   openSemIndex=[[pte+11]*512+496+2*semDesc+1];
+   while([SEMAPHORE_TABLE+4*openSemIndex]!=[SYSTEM_STATUS_TABLE+1] && [SEMAPHORE_TABLE+4*openSemIndex]!=-1) do
+        [pte+4]=WAIT_SEMAPHORE;
+        [pte+5]=openSemIndex;
+        backup;
+        call MOD_5;
+        restore;
+   endwhile;
+
+   // Set lock pid to pid of current process
+   [SEMAPHORE_TABLE+4*openSemIndex]=[SYSTEM_STATUS_TABLE+1];
+   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+   [pte+9]=0;
+   SP=[pte+13];
+   print "sem locked";
+   ireturn;
+endif;
+
+if(systemCall==20) then
+    print "Semunlock";
+    [pte+9]=20;
+    alias semDesc R4;
+    semDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+    if(semDesc<0 || semDesc>7 || [[pte+11]*512+496+2*semDesc]!=SEMAPHORE) then 
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [pte+9]=0;
+      SP=[pte+13];
+      ireturn;
+   endif;
+
+    alias openSemIndex R5;
+    openSemIndex=[[pte+11]*512+497+2*semDesc];
+    if([SEMAPHORE_TABLE+4*openSemIndex]!=-1) then
+       if([SEMAPHORE_TABLE+4*openSemIndex]!=[SYSTEM_STATUS_TABLE+1]) then
+          [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-2;
+          [pte+9]=0;
+          SP=[pte+13];
+          ireturn;
+       endif;
+       [SEMAPHORE_TABLE+4*openSemIndex]=-1;
+       alias i R6;
+       i=2;
+       while(i<16) do
+            if([PROCESS_TABLE+i*16+4]==WAIT_SEMAPHORE && [PROCESS_TABLE+i*16+5]==openSemIndex) then
+                [PROCESS_TABLE+i*16+4]=READY;
+            endif;
+            i=i+1;
+       endwhile;
+    endif;
+
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+    [pte+9]=0;
+    SP=[pte+13];
+    print "sem unlocked";
+    ireturn;
+endif;
+
+[pte+9]=0;
+SP=[+13];
+ireturn;

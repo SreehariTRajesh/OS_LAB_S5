@@ -6,7 +6,7 @@ int main(){
     begin
         w="idle";
         while(1==1) do
-            a=1;
+	        a=1;
         endwhile;
         return 0;
     end

@@ -1,0 +1,154 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+alias syscallNum R1;
+syscallNum=[[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512];
+alias fileName R2;
+fileName=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+alias process_entry R3;
+process_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+alias physicalAddrRetval R4;
+physicalAddrRetval=[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512;
+if(syscallNum==2) then
+    print "file open";
+    [process_entry+9]=2;
+    alias i R5;
+    alias resource_table R6;
+    resource_table=[process_entry+11]*512+496;
+    i=0;
+    while(i<8) do
+        if([resource_table+i*2]==-1) then
+            break;
+        endif;
+        i=i+1;
+    endwhile;
+    multipush(R0,R1,R2,R3,R4,R5,R6,R7);
+    R1=OPEN;
+    R2=fileName;
+    call MOD_3;
+    R10=R0;
+    multipop(R0,R1,R2,R3,R4,R5,R6,R7);
+    
+    if(R10==-1) then
+       [process_entry+9]=0;
+       SP=[process_entry+13];
+       [physicalAddrRetval]=-1;
+       ireturn;    
+    endif;
+    [resource_table+i*2]=FILE;
+    [resource_table+i*2+1]=R10;
+    [process_entry+9]=0;
+    SP=[process_entry+13];
+    [physicalAddrRetval]=i;
+    print "successful";
+    ireturn;
+endif;
+
+if(syscallNum==3) then
+    print "file close";
+    alias fileDesc R2;
+    [process_entry+9]=3;
+    if(fileDesc<0 || fileDesc>7 ) then
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        [physicalAddrRetval]=-1;
+        ireturn;
+    endif;
+    alias resource_table R6;
+    resource_table=[process_entry+11]*512+496;
+    if([resource_table+2*fileDesc]!=FILE) then
+       [process_entry+9]=0;
+       SP=[process_entry+13];
+       [physicalAddrRetval]=-1;
+       ireturn;
+    endif;
+
+    alias openfileIndex R5;
+    openfileIndex=[resource_table+2*fileDesc+1];
+    
+    multipush(R0,R1,R2,R3,R4,R5,R6);
+    R1=CLOSE;
+    R2=openfileIndex;
+    call MOD_3;
+    multipop(R0,R1,R2,R3,R4,R5,R6);
+    
+    [resource_table+2*fileDesc]=-1;
+    [resource_table+2*fileDesc+1]=-1;
+
+    [process_entry+9]=0;
+    SP=[process_entry+13];
+    [physicalAddrRetval]=0;
+    print "successful";
+    breakpoint;
+    ireturn;
+endif;
+
+if(syscallNum==6) then
+    alias offset R5;
+    offset=[[PTBR+2*((userSP-3)/512)]*512+(userSP-3)%512];
+    [process_entry+9]=6;
+    alias fileDesc R2;
+    if(fileDesc<0 || fileDesc>7) then
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        [physicalAddrRetval]=-1;
+        ireturn;
+    endif;
+    alias resource_table R6;
+    resource_table=[process_entry+11]*512+496;
+    if([resource_table+2*fileDesc]!=FILE) then
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        [physicalAddrRetval]=-1;
+        ireturn;    
+    endif;
+    alias openfileIndex R7;
+    openfileIndex=[resource_table+2*fileDesc+1];
+    alias inode_index R8;
+    inode_index=[OPEN_FILE_TABLE+openfileIndex*4];
+
+    multipush(R0,R1,R2,R3,R4,R5,R6,R7);
+    R1=ACQUIRE_INODE;
+    R2=inode_index;
+    R3=[SYSTEM_STATUS_TABLE+1];
+    call MOD_0;
+    multipop(R0,R1,R2,R3,R4,R5,R6,R7);
+
+    alias lseek_pos R9;
+    lseek_pos=OPEN_FILE_TABLE+openfileIndex*4+2;
+
+    alias file_size R10;
+    file_size=[INODE_TABLE+inode_index*16+2];
+    
+    if([lseek_pos]+offset<0) then
+        multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10);
+        R1=RELEASE_INODE;
+        R2=inode_index;
+        R3=[SYSTEM_STATUS_TABLE+1];
+        call MOD_0;
+        multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10);
+
+        [process_entry+9]=-2;
+        SP=[process_entry+13];
+        [physicalAddrRetval]=0;
+        ireturn;    
+    endif;
+    if([lseek_pos]+offset>file_size) then
+        [lseek_pos]=file_size;
+    else
+        [lseek_pos]=[lseek_pos]+offset;
+    endif;
+    
+    multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10);
+    R1=RELEASE_INODE;
+    R2=inode_index;
+    R3=[SYSTEM_STATUS_TABLE+1];
+    call MOD_0;
+    multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10);
+    
+    [process_entry+9]=0;
+    SP=[process_entry+13];
+    [physicalAddrRetval]=0;
+    ireturn;    
+endif;
