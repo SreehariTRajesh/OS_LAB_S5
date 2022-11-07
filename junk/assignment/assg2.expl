@@ -1,0 +1,24 @@
+int main(){
+    decl
+        int fdesc,junk;
+        int i,data;
+    enddecl
+    begin
+        fdesc=exposcall("Open","out.dat");
+        junk=exposcall("Seek",fdesc,1100);
+        i=2000;
+        while(i<=2513) do
+            fdesc=exposcall("Write",fdesc,i);
+            i=i+1;
+        endwhile;
+        junk=exposcall("Seek",fdesc,514);
+        i=0;
+        while(i<1614) do
+            junk=exposcall("Read",fdesc,data);
+            junk=exposcall("Write",-2,data);
+            junk=exposcall("Seek",fdesc,-2);
+            i=i+1;
+        endwhile;
+        return 0;
+    end
+}

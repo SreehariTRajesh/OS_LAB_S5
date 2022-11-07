@@ -11,7 +11,6 @@ process_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
 alias physicalAddrRetval R4;
 physicalAddrRetval=[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512;
 if(syscallNum==2) then
-    print "file open";
     [process_entry+9]=2;
     alias i R5;
     alias resource_table R6;
@@ -41,12 +40,10 @@ if(syscallNum==2) then
     [process_entry+9]=0;
     SP=[process_entry+13];
     [physicalAddrRetval]=i;
-    print "successful";
     ireturn;
 endif;
 
 if(syscallNum==3) then
-    print "file close";
     alias fileDesc R2;
     [process_entry+9]=3;
     if(fileDesc<0 || fileDesc>7 ) then
@@ -79,7 +76,6 @@ if(syscallNum==3) then
     [process_entry+9]=0;
     SP=[process_entry+13];
     [physicalAddrRetval]=0;
-    print "successful";
     breakpoint;
     ireturn;
 endif;

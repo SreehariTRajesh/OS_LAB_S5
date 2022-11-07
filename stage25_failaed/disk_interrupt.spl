@@ -1,0 +1,18 @@
+
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+backup;
+
+[DISK_STATUS_TABLE]=0;
+alias pid R0;
+pid=0;
+while(pid<16) do
+    if([PROCESS_TABLE+pid*16+4]==WAIT_DISK) then
+        [PROCESS_TABLE+pid*16+4]=READY;
+    endif;
+    pid=pid+1;
+endwhile;
+
+restore;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+ireturn;

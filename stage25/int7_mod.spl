@@ -48,7 +48,6 @@ open_file_entry=OPEN_FILE_TABLE+openfileIndex*4;
 
 alias inode_index R8;
 inode_index=[open_file_entry];
-
 if([INODE_TABLE+inode_index*16+3]!=[process_entry+3] &&[INODE_TABLE+inode_index*16+4]==EXCLUSIVE) then
     [physicalAddrRetVal]=-3;
     SP=[process_entry+13];
@@ -73,20 +72,19 @@ if([lseek_pos]==MAX_FILE_SIZE) then
     call MOD_0;
     multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8);
 endif;
-
 if([lseek_pos]%512==0 && [lseek_pos]==[INODE_TABLE+inode_index*16+2]) then
-    multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8);
+    multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
     R1=GET_FREE_BLOCK;
     call MOD_2;
     R10=R0;
-    multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8);
+    multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
 
-    multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8);
+    multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
     R1=RELEASE_INODE;
     R2=inode_index;
     R3=[SYSTEM_STATUS_TABLE+1];
     call MOD_0;
-    multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8);
+    multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
     
     [INODE_TABLE+inode_index*16+[lseek_pos]/512+8]=R10;
 
@@ -98,6 +96,7 @@ alias offset R11;
 block_num=[INODE_TABLE+inode_index*16+8+[lseek_pos]/512];
 offset=[lseek_pos]%512;
 
+
 multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11);
 R1=BUFFERED_WRITE;
 R4=word;
@@ -105,6 +104,7 @@ R2=block_num;
 R3=offset;
 call MOD_3;
 multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11);
+
 
 if([lseek_pos]==[INODE_TABLE+inode_index*16+2]) then
    [INODE_TABLE+inode_index*16+2]=[INODE_TABLE+inode_index*16+2]+1;

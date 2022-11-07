@@ -1,0 +1,19 @@
+int main(){
+    decl
+        int i,fdesc,junk;
+    enddecl
+    begin
+        i=0;
+        fdesc=exposcall("Create","output.dat",1);
+        fdesc=exposcall("Open","output.dat");
+        if(fdesc==0) then
+            write("Successful");
+        endif;
+        while(i<2048) do    
+            junk=exposcall("Write",fdesc,i);
+            write(i);
+            i=i+1;
+        endwhile;
+        return 0;
+    end
+}

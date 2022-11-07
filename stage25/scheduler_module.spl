@@ -1,9 +1,9 @@
-breakpoint;
 alias pid R0;
 pid=[SYSTEM_STATUS_TABLE+1];
 multipush(BP);
 alias process_table_entry R2;
 process_table_entry=PROCESS_TABLE+pid*16;
+
 [process_table_entry+12]=SP%512;
 [process_table_entry+14]=PTBR;
 [process_table_entry+15]=PTLR;
@@ -30,7 +30,6 @@ PTBR=[new_process_entry+14];
 PTLR=[new_process_entry+15];
 
 if([new_process_entry+4]==CREATED) then
-    breakpoint;
     SP=[new_process_entry+13];
     BP=[[new_process_entry+11]*512];
     [new_process_entry+4]=RUNNING;

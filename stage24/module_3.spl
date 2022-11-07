@@ -74,31 +74,35 @@ if(functionNum==OPEN) then
 endif;
 
 if(functionNum==CLOSE) then
-    alias inode_index R3;
-    inode_index=[OPEN_FILE_TABLE+R2*4];
-    [OPEN_FILE_TABLE+R2*4+1]=[OPEN_FILE_TABLE+R2*4+1]-1;
-    if([OPEN_FILE_TABLE+R2*4+1]==0) then
-       [OPEN_FILE_TABLE+R2*4+0]=-1;
-       [OPEN_FILE_TABLE+R2*4+1]=-1;
-       [OPEN_FILE_TABLE+R2*4+2]=-1;
+    alias open_file_entry R3;
+    open_file_entry =OPEN_FILE_TABLE+R2*4;
+    alias inode_index R4;
+    inode_index=[open_file_entry];
+    alias file_status_entry R5;
+    file_status_entry=FILE_STATUS_TABLE+inode_index*4;
+    [open_file_entry+1]=[open_file_entry+1]-1;
+    if([open_file_entry+1]==0) then
+       [open_file_entry+0]=-1;
+       [open_file_entry+1]=-1;
+       [open_file_entry+2]=-1;
        if([INODE_TABLE+inode_index*16]!=ROOT) then
-          [FILE_STATUS_TABLE+inode_index*4+1]=[FILE_STATUS_TABLE+inode_index*4+1]-1;
+          [file_status_entry+1]=[FILE_STATUS_TABLE+inode_index*4+1]-1;
        endif;
-       if([FILE_STATUS_TABLE+inode_index*4+1]==0) then
-          [FILE_STATUS_TABLE+inode_index*4+1]=-1;
+       if([file_status_entry+1]==0) then
+          [file_status_entry+1]=-1;
        endif;
     endif;
-    
     return;
 endif;
 
 alias disk_block_num R2;
 alias offset R3;
 alias membuff_address R4;
+alias buff_num R5;
+buff_num=disk_block_num%4;
+alias buff_entry R6;
+buff_entry=BUFFER_TABLE+buff_num*4;  
 if(functionNum==BUFFERED_READ) then
-   alias buff_num R5;
-   buff_num=disk_block_num%4;
-   
    multipush(R0,R1,R2,R3,R4,R5);
    R1=ACQUIRE_BUFFER;
    R2=buff_num;
@@ -106,16 +110,16 @@ if(functionNum==BUFFERED_READ) then
    call MOD_0;
    multipop(R0,R1,R2,R3,R4,R5);
 
-   if([BUFFER_TABLE+buff_num*4]!=disk_block_num) then
-      if([BUFFER_TABLE+buff_num*4+1]==1) then
+   if([buff_entry]!=disk_block_num) then
+      if([buff_entry+1]==1) then
           multipush(R0,R1,R2,R3,R4,R5);
           R1=DISK_STORE;
           R2=[SYSTEM_STATUS_TABLE+1];
           R3=71+buff_num;
-          R4=[BUFFER_TABLE+buff_num*4];
+          R4=[buff_entry];
           call MOD_3;
           multipop(R0,R1,R2,R3,R4,R5);
-         [BUFFER_TABLE+buff_num*4+1]=0;
+         [buff_entry+1]=0;
       endif;   
       multipush(R0,R1,R2,R3,R4,R5);
       R1=DISK_LOAD;
@@ -124,7 +128,7 @@ if(functionNum==BUFFERED_READ) then
       R3=71+buff_num;
       call MOD_4;
       multipop(R0,R1,R2,R3,R4,R5);
-      [BUFFER_TABLE+buff_num*4]=disk_block_num;   
+      [buff_entry]=disk_block_num;   
    endif;
    [[PTBR+2*((membuff_address/512))]*512+membuff_address%512]=[(71+buff_num)*512+offset];   
    multipush(R0,R1,R2,R3,R4,R5);

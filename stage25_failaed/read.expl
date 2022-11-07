@@ -1,0 +1,17 @@
+int main(){
+    decl
+        int w,a,fdesc,j;
+        str filename;
+    enddecl
+    begin
+        w=0;
+        j=exposcall("Read",-1,filename);
+        fdesc=exposcall("Open",filename);
+        a=0;
+        while(a!=-2) do
+            a=exposcall("Read",fdesc,w);
+            j=exposcall("Write",-2,w);
+        endwhile;
+        return 0;
+    end
+}

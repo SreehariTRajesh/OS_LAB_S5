@@ -1,0 +1,47 @@
+int main()
+{
+decl
+    int temp, pid, a;
+    str input,file1,file2;
+enddecl
+begin
+    a=1;
+    while(a == 1) do
+        temp = exposcall("Write",-2,"shell@:~$");
+        temp = exposcall("Read",-1, input);
+        if(input != "Shutdown") then
+            pid = exposcall("Fork");
+            if(pid < 0) then
+                temp = exposcall("Write",-2, "Fork Failure");
+                continue;
+            endif;
+            if(pid != 0) then
+                temp = exposcall("Wait",pid);
+            else
+                if(input=="ls") then
+                    temp=exposcall("Exec","ls.xsm");
+                endif;
+                if(input=="rm") then
+                    temp=exposcall("Exec","delete.xsm");
+                endif;
+                if(input=="cp") then
+                    temp=exposcall("Exec","cp.xsm");
+                endif;
+                if(input=="cat") then
+                    temp=exposcall("Exec","read.xsm");
+                endif;
+                temp = exposcall("Exec",input);
+                if(temp !=0) then
+                    temp = exposcall("Write",-2, "cmd not found");
+                    break;
+                endif;
+            endif;
+        else
+            write("shutting down");
+            temp = exposcall("Shutdown");
+            break;
+        endif;
+    endwhile;
+    return 0;
+end
+}

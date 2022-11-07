@@ -1,0 +1,21 @@
+int main(){
+    decl
+        int fdesc,junk;
+        str dat;
+    enddecl
+    begin
+        fdesc=exposcall("Open","root");
+        while(fdesc!=-2) do
+            junk=exposcall("Read",fdesc,dat);
+            if(dat=="-1") then
+                break;
+            endif;
+            if(dat=="") then
+                break;
+            endif;
+            junk=exposcall("Write",-2,dat);
+            junk=exposcall("Seek",fdesc,7);
+        endwhile;
+        return 0;
+    end
+}
