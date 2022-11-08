@@ -1,0 +1,293 @@
+
+// Disk Free List
+loadi(61,2);
+//root file
+loadi(62,5);
+
+loadi(18,31);
+loadi(19,32);
+
+loadi(63,13);
+loadi(64,14);
+
+// Init/Login Code
+loadi(65,7);
+
+// Shell Code
+
+loadi(67,9);
+loadi(68,10);
+
+loadi(2,15);
+loadi(3,16);
+
+loadi(4,17);
+loadi(5,18);
+
+loadi(22,35);
+loadi(23,26);
+
+loadi(16,29);
+loadi(17,30);
+
+loadi(59,3);
+loadi(60,4);
+
+// Context Switch Module
+
+loadi(50,63);
+loadi(51,64);
+
+// Resource Manager
+
+loadi(40,53);
+loadi(41,54);
+
+// Device Manager
+
+loadi(48,61);
+loadi(49,62);
+
+// Console Interrupt
+
+loadi(8,21);
+loadi(9,22);
+
+// Interrupt 6
+
+loadi(14,27);
+loadi(15,28);
+
+// Interrupt Routine 9
+
+loadi(20,33);
+loadi(21,34);
+
+// Module 1
+
+loadi(42,55);
+loadi(43,56);
+
+// Module 2
+
+loadi(44,57);
+loadi(45,58);
+
+// Module 3
+
+loadi(46,59);
+loadi(47,60);
+
+// Disk Interrupt Routine;
+
+loadi(6,19);
+loadi(7,20);
+
+// Routine 11 
+
+loadi(24,37);
+loadi(25,38);
+
+// Routine 15 Shutdown System Call
+
+loadi(32,45);
+loadi(33,46);
+
+// Routine 13 Semget/Semrelease;
+
+loadi(28,41);
+loadi(29,42);
+
+// Routine 14 SemLock/SemUnlock;
+
+loadi(30,43);
+loadi(31,44);
+
+//Routine 4;
+
+loadi(10,23);
+loadi(11,24);
+
+//Routine 5
+
+loadi(12,25);
+loadi(13,26);
+
+//Routine 16
+
+loadi(34,47);
+loadi(35,48);
+
+//Routine 12
+
+loadi(26,39);
+loadi(27,40);
+
+//Routine 17
+
+loadi(36,49);
+loadi(37,50);
+
+[DISK_STATUS_TABLE]=0;
+
+alias idx R10;
+idx=496;
+while(idx<512) do
+    [[PROCESS_TABLE+27]*512+idx]=-1;
+    idx=idx+1;
+endwhile;
+idx=0;
+while(idx<128) do
+    [MEMORY_FREE_LIST+idx]=0;
+    idx=idx+1;
+endwhile;
+
+idx=0;
+while(idx<32) do
+    alias semaphore_entry R5;
+    semaphore_entry=SEMAPHORE_TABLE+idx*4;
+    [semaphore_entry]=-1;
+    [semaphore_entry+1]= 0;
+    idx=idx+1;
+endwhile;
+
+idx=0;
+while(idx<60) do
+    alias file_status_entry R5;
+    file_status_entry=FILE_STATUS_TABLE+idx*4;
+    [file_status_entry]=-1;
+    [file_status_entry+1]=-1;
+    idx=idx+1;
+endwhile;
+
+idx=0;
+while(idx<MAX_BUFFER) do
+    alias buffer_entry R5;
+    buffer_entry=BUFFER_TABLE+idx*4;
+    [buffer_entry]=-1;
+    [buffer_entry+1]=0;
+    [buffer_entry+2]=-1;
+    idx=idx+1;
+endwhile;
+idx=0;
+while(idx<MAX_OPENFILE_NUM) do
+    alias open_file_entry R5;
+    open_file_entry=OPEN_FILE_TABLE+idx*4;
+    [open_file_entry]=-1;
+    [open_file_entry+1]=0;
+    idx=idx+1;
+endwhile;
+
+idx=2;
+while(idx<82) do
+    [MEMORY_FREE_LIST+idx]=1;
+    idx=idx+1;
+endwhile;
+
+[SYSTEM_STATUS_TABLE+3]=0;
+[SYSTEM_STATUS_TABLE+2]=47;
+
+[TERMINAL_STATUS_TABLE]=0;
+
+PTBR=PAGE_TABLE_BASE+40;
+PTLR=10;
+
+[PTBR+0]=63;
+[PTBR+1]="0100";
+[PTBR+2]=64;
+[PTBR+3]="0100";
+
+[PTBR+4]=-1;
+[PTBR+5]="0000";
+[PTBR+6]=-1;
+[PTBR+7]="0000";
+
+[PTBR+8]=67;
+[PTBR+9]="0100";
+[PTBR+10]=68;
+[PTBR+11]="0100";
+[PTBR+12]=-1;
+[PTBR+13]="0000";
+[PTBR+14]=-1;
+[PTBR+15]="0000";
+
+[PTBR+16]=78;
+[PTBR+17]="0110";
+[PTBR+18]=79;
+[PTBR+19]="0110";
+
+[78*512]=[67*512+1];
+
+[PROCESS_TABLE+43]=80;
+[PROCESS_TABLE+35]=1;
+[PROCESS_TABLE+36]=TERMINATED;
+[PROCESS_TABLE+45]=8*512;
+[PROCESS_TABLE+44]=0;
+[PROCESS_TABLE+46]=PTBR;
+[PROCESS_TABLE+47]=PTLR;
+[PROCESS_TABLE+33]=2;
+[PROCESS_TABLE+34]=1;
+
+idx=0;
+while(idx<4) do
+    [DISK_MAP_TABLE+2*10+idx]=-1;
+    idx=idx+1;
+endwhile;
+[DISK_MAP_TABLE+2*10+4]=67;
+[DISK_MAP_TABLE+2*10+5]=68;
+[DISK_MAP_TABLE+2*10+6]=-1;
+[DISK_MAP_TABLE+2*10+7]=-1;
+[DISK_MAP_TABLE+2*10+8]=78;
+[DISK_MAP_TABLE+2*10+9]=79;
+
+PTBR=PAGE_TABLE_BASE+20;
+PTLR=10;
+
+[PROCESS_TABLE+27]=77;
+[PROCESS_TABLE+19]=1;
+[PROCESS_TABLE+17]=1;
+[PROCESS_TABLE+20]=CREATED;
+[PROCESS_TABLE+29]=8*512;
+[PROCESS_TABLE+28]=0;
+[PROCESS_TABLE+30]=PTBR;
+[PROCESS_TABLE+31]=PTLR;
+
+idx=0;
+while(idx<16) do
+    [80*512+496+idx]=-1;
+    idx=idx+1;
+endwhile;
+
+[PTBR+0]=63;
+[PTBR+1]="0100";
+[PTBR+2]=64;
+[PTBR+3]="0100";
+
+[PTBR+4]=-1;
+[PTBR+5]="0000";
+[PTBR+6]=-1;
+[PTBR+7]="0000";
+
+[PTBR+8]=65;
+[PTBR+9]="0100";
+[PTBR+10]=-1;
+[PTBR+11]="0000";
+[PTBR+12]=-1;
+[PTBR+13]="0000";
+[PTBR+14]=-1;
+[PTBR+15]="0000";
+
+[PTBR+16]=66;
+[PTBR+17]="0110";
+[PTBR+18]=77;
+[PTBR+19]="0110";
+
+[66*512]=[65*512+1];
+
+idx=36;
+while(idx<245) do
+    [PROCESS_TABLE+idx]=TERMINATED;
+    idx=idx+16;
+endwhile;
+
+return;

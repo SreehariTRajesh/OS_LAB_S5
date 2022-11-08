@@ -1,0 +1,2 @@
+load --exec ../stage26/lu.xsm
+run ../stage26/runfile

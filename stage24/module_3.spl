@@ -35,7 +35,7 @@ if(functionNum==OPEN) then
    alias j R4;
    j=0;
    while(j<MAX_OPENFILE_NUM) do
-        if([OPEN_FILE_TABLE+j*8]==-1) then
+        if([OPEN_FILE_TABLE+j*4]==-1) then
             break;
         endif;
         j=j+1;
