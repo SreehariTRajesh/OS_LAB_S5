@@ -1,0 +1,63 @@
+[PROCESS_TABLE+([SYSTEM_STATUS_TABLE+1]*16)+13]=SP;
+SP=[PROCESS_TABLE+([SYSTEM_STATUS_TABLE+1]*16)+11]*512-1;
+
+backup;
+alias flag R3;
+flag=0;
+if([SYSTEM_STATUS_TABLE+5]!=0) then
+    //swapper daemon,swap in;
+    
+    if([SYSTEM_STATUS_TABLE+1]==15 && [SYSTEM_STATUS_TABLE+5]==SWAP_OUT) then
+        multipush(R0,R1,R2,R3);
+        R1=SWAP_IN;
+        R2=[SYSTEM_STATUS_TABLE+1];
+        call MOD_6;
+        multipop(R0,R1,R2,R3);
+    endif;
+    
+    //swapper daemon,swap out;
+
+    if([SYSTEM_STATUS_TABLE+1]==15 && [SYSTEM_STATUS_TABLE+5]==SWAP_IN) then
+        multipush(R0,R1,R2,R3);
+        R1=SWAP_OUT;
+        R2=[SYSTEM_STATUS_TABLE+1];
+        call MOD_6;
+        multipop(R0,R1,R2,R3);
+    endif;
+    
+    // idle
+    
+    if([SYSTEM_STATUS_TABLE+1]==0) then
+        flag=1;
+    endif;
+    
+else
+    if([SYSTEM_STATUS_TABLE+2]<MEM_LOW) then
+        [SYSTEM_STATUS_TABLE+5]=SWAP_OUT;
+    endif;
+    if([SYSTEM_STATUS_TABLE+4]!=0) then
+        alias i R6;
+        i=0;
+        while(i<16) do
+            if([PROCESS_TABLE+i*16]>MAX_TICK || [SYSTEM_STATUS_TABLE+2]>MEM_HIGH) then
+               [SYSTEM_STATUS_TABLE+5]=SWAP_IN;
+            endif;
+            i=i+1;
+        endwhile;
+    endif;
+endif;
+if(flag==0) then
+    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+4]=READY;
+    alias i R5;
+    i=0;
+    while(i<16) do
+        [PROCESS_TABLE+i*16]=[PROCESS_TABLE+i*16]+1;
+        i=i+1;
+    endwhile;
+endif;
+
+call MOD_5;
+
+restore;
+SP=[PROCESS_TABLE+([SYSTEM_STATUS_TABLE+1]*16)+13];
+ireturn;

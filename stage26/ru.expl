@@ -1,0 +1,26 @@
+int main(){
+    decl
+        str fileName,user;
+        int ownerID;
+        int fptr,junk,uid;
+    enddecl
+    begin
+        fptr=exposcall("Open","root");
+        junk=exposcall("Read",-1,user);
+        uid=exposcall("Getuid",user);
+        while(fptr!=-2) do
+            fptr=exposcall("Read",fptr,fileName);
+            if(fptr==-2) then
+                break;
+            endif;
+            junk=exposcall("Seek",fptr,2);
+            junk=exposcall("Read",fptr,ownerID);
+            if(uid==ownerID) then
+                write(fileName);
+                junk=exposcall("Delete",fileName);
+            endif;
+            junk=exposcall("Seek",fptr,4);
+        endwhile;
+        return 0;
+    end
+}

@@ -1,0 +1,127 @@
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=8;
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+alias childPID R2;
+
+multipush(R0,R1,R2);
+R1=GET_PCB_ENTRY;
+call MOD_1;
+R10=R0;
+multipop(R0,R1,R2);
+childPID=R10;
+
+alias childPT R3;
+alias childPE R4;
+alias parentPE R5;
+childPT=PAGE_TABLE_BASE+childPID*20;
+childPE=PROCESS_TABLE+childPID*16;
+parentPE=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+
+if(childPID==-1) then
+    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+    [parentPE+9]=0;
+    SP=[parentPE+13];
+    ireturn;
+endif;
+
+if([PTBR+4]==-1 && [PTBR+6]==-1) then
+    multipush(R0,R1,R2,R3,R4,R5);
+    R1=GET_FREE_PAGE;
+    call MOD_2;
+    [PTBR+4]=R0;
+    [PTBR+5]="1110";
+    multipop(R0,R1,R2,R3,R4,R5);
+    
+    multipush(R0,R1,R2,R3,R4,R5);
+    R1=GET_FREE_PAGE;
+    call MOD_2;
+    [PTBR+6]=R0;
+    [PTBR+7]="1110";
+    multipop(R0,R1,R2,R3,R4,R5);
+endif;
+
+R10=R3;
+multipush(R0,R1,R2,R3,R4,R5);
+R1=GET_FREE_PAGE;
+call MOD_2;
+[R10+16]=R0;
+[R10+17]="0110";
+multipop(R0,R1,R2,R3,R4,R5);
+
+
+R10=R3;
+multipush(R0,R1,R2,R3,R4,R5);
+R1=GET_FREE_PAGE;
+call MOD_2;
+[R10+18]=R0;
+[R10+19]="0110";
+multipop(R0,R1,R2,R3,R4,R5);
+
+
+R10=R4;
+multipush(R0,R1,R2,R3,R4,R5);
+R1=GET_FREE_PAGE;
+call MOD_2;
+[R10+11]=R0;
+multipop(R0,R1,R2,R3,R4,R5);
+
+[childPE]=0;
+[childPE+1]=childPID;
+[childPE+2]=[SYSTEM_STATUS_TABLE+1];
+[childPE+3]=[parentPE+3];
+[childPE+6]=[parentPE+6];
+[childPE+7]=[parentPE+7];
+[childPE+9]=0;
+[childPE+10]=[parentPE+10];
+[childPE+12]=0;
+[childPE+13]=[parentPE+13];
+[childPE+4]=CREATED;
+
+alias i R6;
+i=496;
+while(i<512) do
+    [[childPE+11]*512+i]=[[parentPE+11]*512+i];
+    [[childPE+11]*512+i+1]=[[parentPE+11]*512+i+1];
+    if([[childPE+11]*512+i]==SEMAPHORE) then
+        [SEMAPHORE_TABLE+[[childPE+11]*512+i+1]*4+1]=[SEMAPHORE_TABLE+[[childPE+11]*512+i+1]*4+1]+1;
+    endif;
+    if([[childPE+11]*512+i]==FILE) then
+        [OPEN_FILE_TABLE+[[childPE+11]*512+i+1]*4+1]=[OPEN_FILE_TABLE+[[childPE+11]*512+i+1]*4+1]+1;
+    endif;
+    i=i+2;
+endwhile;
+i=0;
+
+while(i<10) do
+    [DISK_MAP_TABLE+childPID*10+i]=[DISK_MAP_TABLE+[SYSTEM_STATUS_TABLE+1]*10+i];
+    i=i+1;
+endwhile;
+i=0;
+
+while(i<8) do
+    [childPT+2*i]=[PTBR+2*i];
+    [childPT+2*i+1]=[PTBR+2*i+1];
+    [MEMORY_FREE_LIST+[PTBR+2*i]]=[MEMORY_FREE_LIST+[PTBR+2*i]]+1;
+    i=i+1;
+endwhile;
+
+i=0;
+while(i<512) do
+    [[childPT+16]*512+i]=[[PTBR+16]*512+i];
+    [[childPT+18]*512+i]=[[PTBR+18]*512+i];
+    i=i+1;
+endwhile;
+
+[[childPE+11]*512]=BP;
+alias parentSP R7;
+alias childSP R8;
+parentSP=[parentPE+13];
+[[PTBR+2*((parentSP-1)/512)]*512+(parentSP-1)%512]=childPID;
+childSP=[childPE+13];
+[[childPT+2*((childSP-1)/512)]*512+(childSP-1)%512]=0;
+
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+ireturn;

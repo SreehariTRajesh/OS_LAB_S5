@@ -75,7 +75,7 @@ if([syscallPhysicalAddr]==4) then
         SP=[process_entry+13];
         ireturn;
     endif;
-    if([inode_entry]!=DATA || ([inode_entry+3]!=[process_entry+3] && [inode_entry+3]!=0)) then
+    if([inode_entry]!=DATA || ([inode_entry+3]!=[process_entry+3] && [process_entry+3]!=0)) then
         [physicaladdr]=-1;
         [process_entry+9]=0;
         SP=[process_entry+13];
