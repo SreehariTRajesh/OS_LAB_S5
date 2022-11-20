@@ -1,0 +1,31 @@
+load --init ../stage27/login.xsm
+load --shell ../stage27/exshell.xsm
+load --idle ../stage12/idle.xsm
+load --os ../stage27/os_startup.xsm
+load --int=timer ../stage27/sample_timer.xsm
+load --int=console ../stage27/console_interrupt.xsm
+load --int=disk ../stage27/disk_interrupt.xsm
+load --int=4 ../stage27/sample_int4.xsm
+load --int=5 ../stage27/sample_int5.xsm
+load --int=6 ../stage27/int6_mod.xsm
+load --int=7 ../stage27/int7_mod.xsm
+load --int=8 ../stage27/sample_int8.xsm
+load --int=9 ../stage27/sample_int9.xsm
+load --int=10 ../stage27/int10.xsm
+load --int=11 ../stage27/sample_int11.xsm
+load --int=12 ../stage27/sample_int12.xsm
+load --int=13 ../stage27/sample_int13_copy.xsm
+load --int=14 ../stage27/sample_int14_copy.xsm
+load --int=15 ../stage27/sample_int15.xsm
+load --int=16 ../stage27/sample_int16.xsm
+load --int=17 ../stage27/sample_int17.xsm
+load --module 0 ../stage27/module_0.xsm
+load --module 1 ../stage27/module_1.xsm
+load --module 2 ../stage27/module_2.xsm
+load --module 3 ../stage27/module_3.xsm
+load --module 4 ../stage27/module_4.xsm
+load --module 6 ../stage27/module_6.xsm
+load --module 5 ../stage27/scheduler_module.xsm
+load --module 7 ../stage27/boot_module.xsm
+load --exhandler ../stage27/exhandler.xsm
+exit

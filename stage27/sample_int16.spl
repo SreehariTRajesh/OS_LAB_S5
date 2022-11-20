@@ -54,8 +54,7 @@ if(syscallNum==22) then
         SP=[process_entry+13];
         ireturn;    
     endif;
-    print i;
-
+ 
     [USER_TABLE+i*2]=username;
     encrypt R7;
     [USER_TABLE+i*2+1]=password;

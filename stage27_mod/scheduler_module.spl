@@ -1,0 +1,52 @@
+alias pid R0;
+pid=[SYSTEM_STATUS_TABLE+1];
+multipush(BP);
+alias process_table_entry R2;
+process_table_entry=PROCESS_TABLE+pid*16;
+[process_table_entry+12]=SP%512;
+[process_table_entry+14]=PTBR;
+[process_table_entry+15]=PTLR;
+
+alias newPID R3;
+alias new_process_entry R4;
+
+if([SYSTEM_STATUS_TABLE+5]!=0) then
+    if([PROCESS_TABLE+244]!=WAIT_DISK) then
+        newPID=15;
+    else
+        newPID=0;
+    endif;
+else
+    newPID=(pid+1)%16;
+    while(newPID<15) do
+        new_process_entry = PROCESS_TABLE+newPID*16;
+        if([new_process_entry+6]==0) then
+            if([new_process_entry+4]==READY||[new_process_entry+4]==CREATED) then
+                break;
+            endif;
+        endif;
+        newPID=newPID+1;
+    endwhile;
+    if(newPID==15) then
+        newPID=0;
+    endif;
+endif;
+
+new_process_entry=PROCESS_TABLE+newPID*16;
+
+[SYSTEM_STATUS_TABLE+1]=newPID;
+PTBR=[new_process_entry+14];
+PTLR=[new_process_entry+15];
+
+if([new_process_entry+4]==CREATED) then
+    SP=[new_process_entry+13];
+    BP=[[new_process_entry+11]*512];
+    [new_process_entry+4]=RUNNING;
+    [new_process_entry+9]=0;
+    ireturn;
+endif;
+
+SP=[new_process_entry+11]*512+[new_process_entry+12];
+[new_process_entry+4]=RUNNING;
+multipop(BP);
+return;

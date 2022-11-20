@@ -53,16 +53,13 @@ if(functionNum==EXIT_PROCESS) then
             i=i+1;
         endwhile;
     endif;
-    multipush(R0,R1,R2,R3,R4,R5);
+
     pid=[SYSTEM_STATUS_TABLE+1];
     functionNum=FREE_PAGE_TABLE;
     call MOD_1;
-    multipop(R0,R1,R2,R3,R4,R5);
 
-    multipush(R0,R1,R2,R3,R4,R5);
     functionNum=FREE_USER_AREA_PAGE;
     call MOD_1;
-    multipop(R0,R1,R2,R3,R4,R5);
 
     [PROCESS_TABLE+pid*16+4]=TERMINATED;
     return;

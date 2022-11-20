@@ -1,0 +1,170 @@
+alias functionNum R1;
+alias pid R2;
+if(functionNum==FREE_USER_AREA_PAGE) then
+    alias userAreaPage R3;
+    userAreaPage=[PROCESS_TABLE+pid*16+11];
+    alias i R4;
+    i=0;
+    alias resource_table R5;
+    resource_table=userAreaPage*512+496;
+    while(i<8) do
+        if([resource_table+2*i]!=-1) then
+            if([resource_table+2*i]==SEMAPHORE) then
+                multipush(R0,R1,R2,R3,R4,R5);
+                R1=RELEASE_SEMAPHORE;
+                R3=pid;
+                R2=[resource_table+2*i+1];
+                call MOD_0;
+                multipop(R0,R1,R2,R3,R4,R5);
+            endif;
+            if([resource_table+2*i]==FILE) then
+                multipush(R0,R1,R2,R3,R4,R5);
+                R1=CLOSE;
+                R2=[resource_table+2*i+1];
+                call MOD_3;
+                multipop(R0,R1,R2,R3,R4,R5);
+            endif;
+            [resource_table+2*i]=-1;
+            [resource_table+2*i+1]=-1;
+        endif;
+        i=i+1;
+    endwhile;
+    multipush(R0,R1,R2,R3,R4,R5);
+    R1=RELEASE_PAGE;
+    R2=userAreaPage;
+    call MOD_2;
+    multipop(R0,R1,R2,R3,R4,R5);
+    return;
+endif;
+
+if(functionNum==EXIT_PROCESS) then
+    if([PROCESS_TABLE+pid*16+9]!=9) then
+        alias i R3;
+        i=1;
+        while(i<16) do
+            alias pid_entry R4;
+            pid_entry=PROCESS_TABLE+i*16;
+            if([pid_entry+2]==pid) then
+                [pid_entry+2]=-1;
+            endif;
+            if([pid_entry+4]==WAIT_PROCESS && [pid_entry+5]==[SYSTEM_STATUS_TABLE+1]) then
+                [pid_entry+4]=READY;
+            endif;
+            i=i+1;
+        endwhile;
+    endif;
+
+    multipush(R0,R1,R2,R3,R4,R5);
+    pid=[SYSTEM_STATUS_TABLE+1];
+    functionNum=FREE_PAGE_TABLE;
+    call MOD_1;
+    multipop(R0,R1,R2,R3,R4,R5);
+
+    multipush(R0,R1,R2,R3,R4,R5);
+    functionNum=FREE_USER_AREA_PAGE;
+    call MOD_1;
+    multipop(R0,R1,R2,R3,R4,R5);
+
+    [PROCESS_TABLE+pid*16+4]=TERMINATED;
+    return;
+endif;
+
+if(functionNum==FREE_PAGE_TABLE) then
+    [PTBR+0]=-1;
+    [PTBR+1]="0000";
+    [PTBR+2]=-1;
+    [PTBR+3]="0000";
+    alias j R3;
+    j=4;
+    while(j<20) do
+        if([PTBR+j]!=-1) then
+            multipush(R0,R1,R2,R3);
+            R1=RELEASE_PAGE;
+            alias page R2;
+            page=[PTBR+j];
+            call MOD_2;
+            [PTBR+j]=-1;
+            multipop(R0,R1,R2,R3);
+            [PTBR+j+1]="0000";
+        endif;
+        j=j+2;
+    endwhile;
+    alias disk_map_entry R4;
+    disk_map_entry=DISK_MAP_TABLE+pid*10;
+    j=0;
+    while(j<10) do
+        if(j==2||j==3||j==8||j==9) then
+            if([disk_map_entry+j]!=-1) then
+                multipush(R0,R1,R2,R3);
+                R1=RELEASE_BLOCK;
+                R3=[disk_map_entry+9];
+                R2=pid;
+                multipop(R0,R1,R2,R3);
+            endif;
+        endif;
+        [disk_map_entry+j]=-1;
+        j=j+1;
+    endwhile;
+    return;
+endif;
+
+if(functionNum==GET_PCB_ENTRY) then
+    alias i R2;
+    i=1;
+    while(i<16) do
+        alias process_entry R5;
+        process_entry=PROCESS_TABLE+i*16;
+        if([process_entry+4]==TERMINATED) then
+            R0=i;
+            [process_entry+1]=i;
+            [process_entry+4]=ALLOCATED;
+            [process_entry+14]=PAGE_TABLE_BASE+i*20;
+            [process_entry+15]=10;
+            return;
+        endif;
+        i=i+1;
+    endwhile;
+    R0=-1;
+    return;
+endif;
+
+if(functionNum==KILL_ALL) then
+   alias i R3;
+   i=0;
+   while(i<MAX_FILE_NUM) do
+        if([INODE_TABLE+i*16+1]!=-1) then
+            multipush(R0,R1,R2,R3);
+            R1=ACQUIRE_INODE;
+            R2=i;
+            R3=[SYSTEM_STATUS_TABLE+1];
+            call MOD_0;
+            multipop(R0,R1,R2,R3);
+        endif;
+        i=i+1;
+   endwhile;
+   i=2;
+   while(i<MAX_PROC_NUM) do
+        if(i!=pid && [PROCESS_TABLE+i*16+4]!=TERMINATED) then
+           multipush(R0,R1,R2,R3);
+           R1=EXIT_PROCESS;
+           R2=i;
+           call MOD_1;
+           multipop(R0,R1,R2,R3);
+        endif;
+        i=i+1;
+   endwhile;
+   i=0;
+   while(i<MAX_FILE_NUM) do
+        if([INODE_TABLE+i*16+1]!=-1) then
+            multipush(R0,R1,R2,R3);
+            R1=RELEASE_INODE;
+            R2=i;
+            R3=[SYSTEM_STATUS_TABLE+1];
+            call MOD_0;
+            multipop(R0,R1,R2,R3);
+        endif;
+        i=i+1;
+   endwhile;
+   return;
+endif;
+return;

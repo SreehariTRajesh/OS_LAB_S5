@@ -7,20 +7,24 @@ alias syscallPhyscialAddress R1;
 alias systemCall R2;
 syscallPhyscialAddress=[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512;
 alias pte R3;
+alias resource_table R4;
+alias physicalAddrRetval R5;
 pte=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
 systemCall=[syscallPhyscialAddress];
+resource_table=[pte+11]*512+496;
+physicalAddrRetval=[PTBR+2*(userSP-1)/512]*512+(userSP-1)%512;
 if(systemCall==19) then
    [pte+9]=19;
-   alias semDesc R4;
+   alias semDesc R6;
    semDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
    if(semDesc<0 || semDesc>7 || [[pte+11]*512+496+2*semDesc]!=SEMAPHORE) then 
-      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [physicalAddrRetval]=-1;
       [pte+9]=0;
       SP=[pte+13];
       ireturn;
    endif;
    
-   alias openSemIndex R5;
+   alias openSemIndex R7;
    openSemIndex=[[pte+11]*512+496+2*semDesc+1];
    while([SEMAPHORE_TABLE+4*openSemIndex]!=[SYSTEM_STATUS_TABLE+1] && [SEMAPHORE_TABLE+4*openSemIndex]!=-1) do
         [pte+4]=WAIT_SEMAPHORE;
@@ -32,7 +36,7 @@ if(systemCall==19) then
 
    // Set lock pid to pid of current process
    [SEMAPHORE_TABLE+4*openSemIndex]=[SYSTEM_STATUS_TABLE+1];
-   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+   [physicalAddrRetval]=0;
    [pte+9]=0;
    SP=[pte+13];
    ireturn;
@@ -40,20 +44,20 @@ endif;
 
 if(systemCall==20) then
     [pte+9]=20;
-    alias semDesc R4;
+    alias semDesc R6;
     semDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
-    if(semDesc<0 || semDesc>7 || [[pte+11]*512+496+2*semDesc]!=SEMAPHORE) then 
-      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+    if(semDesc<0 || semDesc>7 || [resource_table+2*semDesc]!=SEMAPHORE) then 
+      [physicalAddrRetval]=-1;
       [pte+9]=0;
       SP=[pte+13];
       ireturn;
    endif;
 
-    alias openSemIndex R5;
-    openSemIndex=[[pte+11]*512+497+2*semDesc];
+    alias openSemIndex R7;
+    openSemIndex=[resource_table+2*semDesc+1];
     if([SEMAPHORE_TABLE+4*openSemIndex]!=-1) then
        if([SEMAPHORE_TABLE+4*openSemIndex]!=[SYSTEM_STATUS_TABLE+1]) then
-          [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-2;
+          [physicalAddrRetval]=-2;
           [pte+9]=0;
           SP=[pte+13];
           ireturn;
@@ -69,7 +73,7 @@ if(systemCall==20) then
        endwhile;
     endif;
 
-    [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
+    [physicalAddrRetval]=0;
     [pte+9]=0;
     SP=[pte+13];
     ireturn;

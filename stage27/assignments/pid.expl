@@ -1,0 +1,18 @@
+int main(){
+    decl
+        int pid,i;
+    enddecl
+    begin
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Fork");
+        pid=exposcall("Getpid");
+        write(pid);
+        return 0;
+    end
+}

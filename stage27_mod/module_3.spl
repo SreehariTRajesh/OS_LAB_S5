@@ -1,0 +1,197 @@
+alias functionNum R1;
+alias pid R0;
+pid=[SYSTEM_STATUS_TABLE+1];
+if(functionNum==OPEN) then
+   alias i R3;
+   i=0;
+   while(i<MAX_FILE_NUM) do
+        if([INODE_TABLE+i*16+1]==R2) then
+            break;
+        endif;
+        i=i+1;
+   endwhile;
+   if(i==MAX_FILE_NUM) then
+      R0=-1;
+      return;
+   endif;
+   multipush(R0,R1,R2,R3);
+   R1=ACQUIRE_INODE;
+   R2=i;
+   R3=pid;
+   call MOD_0;
+   R10=R0;
+   multipop(R0,R1,R2,R3);
+   if(R10==-1) then
+      R0=-1;
+      return;
+   endif;
+   if([INODE_TABLE+i*16]==EXEC) then
+      multipush(R0,R1,R2,R3);
+      R1=RELEASE_INODE;
+      R2=i;
+      R3=pid;
+      call MOD_0;
+      multipop(R0,R1,R2,R3);
+   endif;
+   alias j R4;
+   j=0;
+   while(j<MAX_OPENFILE_NUM) do
+        if([OPEN_FILE_TABLE+j*4]==-1) then
+            break;
+        endif;
+        j=j+1;
+   endwhile;
+   if(j==MAX_OPENFILE_NUM) then
+      multipush(R0,R1,R2,R3,R4);
+      R1=RELEASE_INODE;
+      R2=i;
+      R3=pid;
+      call MOD_0;
+      multipop(R0,R1,R2,R3,R4);
+      R0=-2;
+      return;
+   endif;
+   alias open_file_entry R5;
+   open_file_entry=OPEN_FILE_TABLE+j*4;
+   alias file_status_entry R6;
+   file_status_entry=FILE_STATUS_TABLE+i*4;
+   if(R2=="root") then
+      [open_file_entry]=INODE_ROOT;
+      [open_file_entry+1]=1;
+      [open_file_entry+2]=0;
+   else
+        if([file_status_entry+1]==-1) then
+           [file_status_entry+1]=1;
+        else
+           [file_status_entry+1]=[file_status_entry+1]+1;
+        endif;
+        [open_file_entry+0]=i;
+        [open_file_entry+1]=1;
+        [open_file_entry+2]=0;
+   endif;
+   multipush(R0,R1,R2,R3,R4);
+   R1=RELEASE_INODE;
+   R2=i;
+   R3=pid;
+   call MOD_0;
+   multipop(R0,R1,R2,R3,R4);
+   R0=j;
+   return;
+endif;
+
+if(functionNum==CLOSE) then
+    alias open_file_entry R4;
+    open_file_entry=OPEN_FILE_TABLE+R2*4;
+    alias inode_index R3;
+    inode_index=[open_file_entry];
+    alias inode_entry R5;
+    inode_entry=INODE_TABLE+inode_index*16;
+    alias file_status_entry R6;
+    file_status_entry=FILE_STATUS_TABLE+inode_index*4;
+    [open_file_entry+1]=[open_file_entry+1]-1;
+    if([open_file_entry+1]==0) then
+       [open_file_entry+0]=-1;
+       [open_file_entry+1]=-1;
+       [open_file_entry+2]=-1;
+       if([inode_entry]!=ROOT) then
+          [file_status_entry+1]=[file_status_entry+1]-1;
+       endif;
+       if([file_status_entry+1]==0) then
+          [file_status_entry+1]=-1;
+       endif;
+    endif;
+    return;
+endif;
+
+alias disk_block_num R2;
+alias offset R3;
+alias membuff_address R4;
+alias buff_num R5;
+buff_num=disk_block_num%4;
+alias buff_entry R6;
+buff_entry=BUFFER_TABLE+buff_num*4;
+if(functionNum==BUFFERED_READ) then
+   multipush(R0,R1,R2,R3,R4,R5,R6);
+   R1=ACQUIRE_BUFFER;
+   R2=buff_num;
+   R3=pid;
+   call MOD_0;
+   multipop(R0,R1,R2,R3,R4,R5,R6);
+   if([buff_entry]!=disk_block_num || [buff_entry]==-1) then
+      if([buff_entry+1]==1) then
+          multipush(R0,R1,R2,R3,R4,R5,R6);
+          R1=DISK_STORE;
+          R2=pid;
+          R3=71+buff_num;
+          R4=[buff_entry];
+          call MOD_4;
+          multipop(R0,R1,R2,R3,R4,R5,R6);
+          [buff_entry+1]=0;
+      endif;
+      multipush(R0,R1,R2,R3,R4,R5,R6);
+      R1=DISK_LOAD;
+      R4=disk_block_num;
+      R2=pid;
+      R3=71+buff_num;
+      call MOD_4;
+      multipop(R0,R1,R2,R3,R4,R5,R6);
+      [buff_entry]=disk_block_num;
+   endif;
+   [membuff_address]=[(71+buff_num)*512+offset];
+   multipush(R0,R1,R2,R3);
+   R1=RELEASE_BUFFER;
+   R2=buff_num;
+   R3=pid;
+   call MOD_0;
+   multipop(R0,R1,R2,R3);
+   return;
+endif;
+
+alias word R4;
+if(functionNum==BUFFERED_WRITE) then
+      multipush(R0,R1,R2,R3,R4,R5,R6);
+      R1=ACQUIRE_BUFFER;
+      R2=buff_num;
+      R3=pid;
+      call MOD_0;
+      multipop(R0,R1,R2,R3,R4,R5,R6);
+      if([buff_entry]!=disk_block_num && [buff_entry]!=-1) then
+         if([buff_entry+1]==1) then
+            multipush(R0,R1,R2,R3,R4,R5,R6);
+            R1=DISK_STORE;
+            R2=pid;
+            R3=71+buff_num;
+            R4=[buff_entry];
+            call MOD_4;
+            multipop(R0,R1,R2,R3,R4,R5,R6);
+         endif;
+         multipush(R0,R1,R2,R3,R4,R5,R6);
+         R1=DISK_LOAD;
+         R4=disk_block_num;
+         R2=pid;
+         R3=71+buff_num;
+         call MOD_4;
+         multipop(R0,R1,R2,R3,R4,R5,R6);
+         [buff_entry]=disk_block_num;
+      endif;
+      if([buff_entry]==-1) then
+         multipush(R0,R1,R2,R3,R4,R5,R6);
+         R1=DISK_LOAD;
+         R4=disk_block_num;
+         R2=pid;
+         R3=71+buff_num;
+         call MOD_4;
+         multipop(R0,R1,R2,R3,R4,R5,R6);
+         [buff_entry]=disk_block_num;
+      endif;
+      [(71+buff_num)*512+offset]=word;
+
+      [buff_entry+1]=1;
+      multipush(R0,R1,R2,R3);
+      R1=RELEASE_BUFFER;
+      R2=buff_num;
+      R3=pid;
+      call MOD_0;
+      multipop(R0,R1,R2,R3);
+      return;
+endif;

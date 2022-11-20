@@ -1,7 +1,11 @@
-rm lu.xsm
-load --exec ../stage26/lu.xsm
-rm ru.xsm
-load --exec ../stage26/ru.xsm
-rm create.xsm
-load --exec ../stage26/create.xsm
-run ../stage26/runfile
+rm merge.xsm
+rm m_merge.xsm
+rm m_store.xsm
+rm m_sort.xsm
+rm pid.xsm
+load --exec ../stage27/assignments/m_merge.xsm
+load --exec ../stage27/assignments/m_sort.xsm
+load --exec ../stage27/assignments/m_store.xsm
+load --exec ../stage27/assignments/merge.xsm
+load --exec ../stage27/assignments/pid.xsm
+run ../stage27/runfile

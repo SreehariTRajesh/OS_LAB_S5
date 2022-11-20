@@ -1,0 +1,204 @@
+alias userSP R0;
+userSP=SP;
+alias process_entry R2;
+alias pid R3;
+pid=[SYSTEM_STATUS_TABLE+1];
+process_entry=PROCESS_TABLE+pid*16;
+
+[process_entry+13]=SP;
+SP=[process_entry+11]*512-1;
+
+alias syscallNum R4;
+syscallNum=[[PTBR+2*(userSP-5)/512]*512+(userSP-5)%512];
+
+alias retaddr R5;
+retaddr=[PTBR+2*(userSP-1)/512]*512+(userSP-1)%512;
+alias username R6;
+username=[[PTBR+2*(userSP-4)/512]*512+(userSP-4)%512];
+alias password R7;
+password=[[PTBR+2*(userSP-3)/512]*512+(userSP-3)%512];
+
+if(syscallNum==22) then   
+    [process_entry+9]=22;
+    if(pid!=2 || [SYSTEM_STATUS_TABLE]!=ROOT) then
+        [retaddr]=-2;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;
+    endif;
+
+    alias i R8;
+
+    i=1;
+    while(i<16) do
+        if([USER_TABLE+i*2]==username) then
+            [retaddr]=-1;
+            [process_entry+9]=0;
+            SP=[process_entry+13];
+            ireturn;
+        endif;
+        i=i+1;
+    endwhile;
+
+    i=1;
+    while(i<16) do
+        if([USER_TABLE+i*2]==-1) then
+            break;
+        endif;
+        i=i+1;
+    endwhile;
+
+    if(i==16) then
+        [retaddr]=-3;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;    
+    endif;
+
+    [USER_TABLE+i*2]=username;
+    encrypt R7;
+    [USER_TABLE+i*2+1]=password;
+
+    [PROCESS_TABLE+25]=0;
+endif;
+
+if(syscallNum==23) then
+    [process_entry+9]=23;
+    if(pid!=2 || [SYSTEM_STATUS_TABLE]!=ROOT) then
+        [retaddr]=-2;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;
+    endif;
+
+    if(username=="root" || username=="kernel") then
+        [retaddr]=-2;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;
+    endif;
+
+    alias i R8;
+    i=0;
+    while(i<16) do
+        if([USER_TABLE+i*2]==username) then
+            break;
+        endif;
+        i=i+1;
+    endwhile;
+
+    if(i==16) then
+        [retaddr]=-1;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;
+    endif;  
+
+    alias j R9;
+    j=0;
+    while(j<MAX_FILE_NUM) do
+        if([ROOT_FILE+i*8+3]==username) then
+           [retaddr]=-3;
+           [process_entry+9]=0;
+           SP=[process_entry+13];
+           ireturn;
+        endif;
+        j=j+1;
+    endwhile;
+
+    [USER_TABLE+2*i]=-1;
+    [USER_TABLE+2*i+1]=-1;
+
+    [PROCESS_TABLE+25]=0;
+endif;
+
+if(syscallNum==24) then
+    [process_entry+9]=24;
+    if(pid!=2) then
+        [retaddr]=-1;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;
+    endif;
+
+    alias i R8;
+    i=0;
+    while(i<16) do
+        if([USER_TABLE+2*i]==username) then
+            break;
+        endif;
+        i=i+1;
+    endwhile;
+
+    if(i==16) then
+       [retaddr]=-2;
+       [process_entry+9]=0;
+       SP=[process_entry+13];
+       ireturn;   
+    endif;
+
+    if([SYSTEM_STATUS_TABLE]!=i) then
+        if(i!=0) then
+            [retaddr]=-1;
+            [process_entry+9]=0;
+            SP=[process_entry+13];
+            ireturn;      
+        endif;
+    endif; 
+
+    encrypt R7;
+    [USER_TABLE+2*i+1]=password;
+    [PROCESS_TABLE+25]=0;
+endif;
+
+
+if(syscallNum==26) then
+    [process_entry+9]=26;
+    alias i R7;
+    i=0;
+    while(i<16) do
+        if([USER_TABLE+2*i]==username) then
+            [retaddr]=i;
+            [process_entry+9]=0;
+            SP=[process_entry+13];
+            ireturn;      
+        endif;
+        i=i+1;
+    endwhile;
+    [retaddr]=-1;
+    [process_entry+9]=0;
+    SP=[process_entry+13];
+    ireturn;      
+endif;
+
+alias userID R6;
+if(syscallNum==25) then
+    [process_entry+9]=25;
+    if(userID<0 || userID>15) then
+        [retaddr]=-1;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;      
+    endif;
+    
+    if([USER_TABLE+2*userID]==-1) then
+        [retaddr]=-1;
+        [process_entry+9]=0;
+        SP=[process_entry+13];
+        ireturn;      
+    endif;
+
+    alias userName R7;
+    userName=[USER_TABLE+2*userID];
+    [PROCESS_TABLE+25]=0;
+    [process_entry+9]=0;
+    [retaddr]=userName;
+    [process_entry+9]=0;
+    SP=[process_entry+13];
+    ireturn;      
+endif;
+
+[retaddr]=0;
+[process_entry+9]=0;
+SP=[process_entry+13];
+ireturn;

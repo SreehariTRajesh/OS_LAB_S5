@@ -22,12 +22,13 @@ if(syscallNum==2) then
         endif;
         i=i+1;
     endwhile;
-    multipush(R0,R1,R2,R3,R4,R5,R6,R7);
+
+    multipush(R0,R1,R2,R3,R4,R5,R6);
     R1=OPEN;
     R2=fileName;
     call MOD_3;
     R10=R0;
-    multipop(R0,R1,R2,R3,R4,R5,R6,R7);
+    multipop(R0,R1,R2,R3,R4,R5,R6);
     
     if(R10==-1) then
        [process_entry+9]=0;
@@ -35,6 +36,7 @@ if(syscallNum==2) then
        [physicalAddrRetval]=-1;
        ireturn;    
     endif;
+
     [resource_table+i*2]=FILE;
     [resource_table+i*2+1]=R10;
     [process_entry+9]=0;
@@ -45,6 +47,7 @@ endif;
 
 if(syscallNum==3) then
     alias fileDesc R2;
+    fileDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
     [process_entry+9]=3;
     if(fileDesc<0 || fileDesc>7 ) then
         [process_entry+9]=0;
@@ -76,7 +79,6 @@ if(syscallNum==3) then
     [process_entry+9]=0;
     SP=[process_entry+13];
     [physicalAddrRetval]=0;
-    breakpoint;
     ireturn;
 endif;
 

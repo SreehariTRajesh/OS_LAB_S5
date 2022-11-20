@@ -6,76 +6,77 @@ SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
 alias syscallPhyscialAddress R1;
 alias systemCall R2;
 syscallPhyscialAddress=[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512;
-
+alias process_entry R3;
+alias resource_table  R4;
+process_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+resource_table=[process_entry+11]*512+496;
 systemCall=[syscallPhyscialAddress];
+alias physicalAddrRetval R5;
+physicalAddrRetval=[PTBR+2*(userSP-1)/512]*512+(userSP-1)%512;
 if(systemCall==17) then
    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=17;
-   alias i R3;
+   alias i R6;
    i=0;
    while(i<8) do
-        if([[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]==-1) then
-           [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]=SEMAPHORE;
+        if([resource_table+2*i]==-1) then
+           [resource_table+2*i]=SEMAPHORE;
            break;
         endif;
         i=i+1;
    endwhile;
    if(i==8) then
-      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
-      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
-      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+      [physicalAddrRetval]=-1;
+      [process_entry+9]=0;
+      SP=[process_entry+13];
       ireturn;
    endif;
 
-   multipush(R0,R1,R2,R3);
+   multipush(R0,R1,R2,R3,R4,R5,R6);
    R1=ACQUIRE_SEMAPHORE;
    R2=[SYSTEM_STATUS_TABLE+1];
    call MOD_0;
    R10=R0;
-   multipop(R0,R1,R2,R3);
+   multipop(R0,R1,R2,R3,R4,R5,R6);
 
    if(R10==-1) then
       [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-2;
-      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
-      [[PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 11]*512+496+2*i] = -1;
-      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+      [process_entry+9]=0;
+      [resource_table+2*i] = -1;
+      SP=[process_entry+13];
       ireturn;   
    endif;
 
-   [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+496]=SEMAPHORE;
-   [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*i+497]=R10;
-   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=i;
-   SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
-   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+   [resource_table+2*i]=SEMAPHORE;
+   [resource_table+2*i+1]=R10;
+   [physicalAddrRetval]=i;
+   SP=[process_entry+13];
+   [process_entry+9]=0;
    ireturn;
 endif;
 
 if(systemCall==18) then
    [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=18;
-   alias semaphoreDesc R3;
+   alias semaphoreDesc R6;
    semaphoreDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
-   if((semaphoreDesc>7 || semaphoreDesc<0) || [[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+2*semaphoreDesc+496]==1) then
-      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
-      [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
-      SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
+   if((semaphoreDesc>7 || semaphoreDesc<0) || [resource_table+2*semaphoreDesc]==1) then
+      [physicalAddrRetval]=-1;
+      [process_entry+9]=0;
+      SP=[process_entry+13];
       ireturn;
    endif;
 
-   multipush(R0,R1,R2,R3);
+   multipush(R0,R1,R2,R3,R4,R5,R6);
    R1=RELEASE_SEMAPHORE;
-   R2=[[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512+497+2*semaphoreDesc];
+   R2=[resource_table+2*semaphoreDesc+1];
    R3=[SYSTEM_STATUS_TABLE+1];
    call MOD_0;
-   multipop(R0,R1,R2,R3);
+   multipop(R0,R1,R2,R3,R4,R5,R6);
    
-   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+496+2*semaphoreDesc]=-1;
-   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+497+2*semaphoreDesc]=-1;
+   [resource_table+2*semaphoreDesc]=-1;
+   [resource_table+2*semaphoreDesc+1]=-1;
 
-   [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=0;
-   SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13];
-   [PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+9]=0;
+   [physicalAddrRetval]=0;
+   SP=[process_entry+13];
+   [process_entry+9]=0;
    ireturn;
 endif;
-
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE+1]*16 + 9] = 0;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
-ireturn;

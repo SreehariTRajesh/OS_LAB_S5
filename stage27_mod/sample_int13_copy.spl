@@ -1,0 +1,79 @@
+alias userSP R0;
+userSP=SP;
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+13]=SP;
+SP=[PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16+11]*512-1;
+
+alias syscallPhysicalAddress R1;
+alias systemCall R2;
+syscallPhysicalAddress=[PTBR+2*((userSP-5)/512)]*512+(userSP-5)%512;
+alias process_entry R3;
+process_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+systemCall=[syscallPhysicalAddress];
+if(systemCall==17) then
+   [process_entry+9]=17;
+   alias i R4;
+   i=0;
+   while(i<8) do
+        if([[process_entry+11]*512+2*i+496]==-1) then
+           break;
+        endif;
+        i=i+1;
+   endwhile;
+   if(i==8) then
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-1;
+      [process_entry+9]=0;
+      SP=[process_entry+13];
+      ireturn;
+   endif;
+
+   [[process_entry+11]*512+2*i+496]=SEMAPHORE;
+
+   multipush(R0,R1,R2,R3,R4);
+   R1=ACQUIRE_SEMAPHORE;
+   R2=[SYSTEM_STATUS_TABLE+1];
+   call MOD_0;
+   R10=R0;
+   multipop(R0,R1,R2,R3,R4);
+
+   if(R10==-1) then
+      [[PTBR+2*((userSP-1)/512)]*512+(userSP-1)%512]=-2;
+      [process_entry+9]=0;
+      [[process_entry+ 11]*512+496+2*i] = -1;
+      SP=[process_entry+13];
+      ireturn;
+   endif;
+
+   [[process_entry+11]*512+2*i+496]=SEMAPHORE;
+   [[process_entry+11]*512+2*i+497]=R10;
+   [syscallPhysicalAddress]=R10;
+   [process_entry+9]=0;
+   SP=[process_entry+13];
+   ireturn;
+endif;
+
+if(systemCall==18) then
+   [process_entry+9]=18;
+   alias semaphoreDesc R4;
+   semaphoreDesc=[[PTBR+2*((userSP-4)/512)]*512+(userSP-4)%512];
+   if((semaphoreDesc>7 || semaphoreDesc<0) || [[process_entry+11]*512+2*semaphoreDesc+496]==1) then
+      [syscallPhysicalAddress]=-1;
+      [process_entry+9]=0;
+      SP=[process_entry+13];
+      ireturn;
+   endif;
+
+   multipush(R0,R1,R2,R3,R4);
+   R1=RELEASE_SEMAPHORE;
+   R2=[[process_entry+11]*512+497+2*semaphoreDesc];
+   R3=[SYSTEM_STATUS_TABLE+1];
+   call MOD_0;
+   multipop(R0,R1,R2,R3,R4);
+
+   [[process_entry+11]*512+496+2*semaphoreDesc]=-1;
+   [[process_entry+11]*512+497+2*semaphoreDesc]=-1;
+
+   [syscallPhysicalAddress]=0;
+   SP=[process_entry+13];
+   [process_entry+9]=0;
+   ireturn;
+endif;

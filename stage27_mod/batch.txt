@@ -1,0 +1,15 @@
+rm pid.xsm
+load --exec ../stage27/pid.xsm
+rm assg3.xsm
+load --exec ../stage27/assg3.xsm
+rm pgm1.xsm
+load --exec ../stage27/pgm1.xsm
+rm assg5.xsm
+load --exec ../stage27/assg5.xsm
+rm m_merge.xsm
+load --exec ../stage27/m_merge.xsm
+rm m_sort.xsm
+load --exec ../stage27/m_sort.xsm
+rm m_store.xsm
+load --exec ../stage27/m_store.xsm
+run ../stage27/runfile

@@ -1,7 +1,10 @@
 
 // Disk Free List
+
 loadi(61,2);
+
 //root file
+
 loadi(62,5);
 
 loadi(18,31);
@@ -77,6 +80,11 @@ loadi(45,58);
 
 loadi(46,59);
 loadi(47,60);
+
+//Module 6
+
+loadi(52,65);
+loadi(53,66);
 
 // Disk Interrupt Routine;
 
@@ -185,7 +193,9 @@ while(idx<82) do
 endwhile;
 
 [SYSTEM_STATUS_TABLE+3]=0;
-[SYSTEM_STATUS_TABLE+2]=47;
+[SYSTEM_STATUS_TABLE+2]=45;
+[SYSTEM_STATUS_TABLE+4]=0;
+[SYSTEM_STATUS_TABLE+5]=0;
 
 [TERMINAL_STATUS_TABLE]=0;
 
@@ -287,6 +297,7 @@ endwhile;
 idx=36;
 while(idx<245) do
     [PROCESS_TABLE+idx]=TERMINATED;
+    [PROCESS_TABLE+idx-4]=0;
     idx=idx+16;
 endwhile;
 

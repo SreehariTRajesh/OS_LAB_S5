@@ -1,227 +1,173 @@
 alias functionNum R1;
-alias pid R2;
+alias PID R2;
 if(functionNum==SWAP_OUT) then
-    // choose process to swap out
-    alias i R3;
-    i=3;
-    while(i<16) do
-        if([PROCESS_TABLE+i*16+4]==WAIT_PROCESS) then
-            break;
-        endif;
-        i=i+1;
-    endwhile;
-    if(i==16) then
-        i=3;
-        while(i<16) do
-            if([PROCESS_TABLE+i*16+4]==WAIT_SEMAPHORE) then
+   alias i R3;
+   i=3;
+   alias max_id R4;
+   alias max_tick R5;
+   max_id=-1;
+   max_tick=-1;
+   alias process_entry R6;
+   while(i<15) do
+        process_entry=PROCESS_TABLE+i*16;
+        if([process_entry+6]!=1) then
+            if([process_entry+4]==WAIT_PROCESS ) then
                 break;
             endif;
-            i=i+1;
-        endwhile;
-    else
-        i=3;
-        alias max_idx R4;
-        max_idx=-1;
-        alias max_cnt R5;
-        max_cnt=0;
-        while(i<16) do
-            alias pstate R6;
-            pstate=PROCESS_TABLE+i*16;
-            if([pstate+4]!=RUNNING || [pstate+4]!=TERMINATED || [pstate+4]!=ALLOCATED || [pstate+6]!=1) then
-                if(max_cnt<[pstate]) then
-                   max_cnt=[pstate];
-                   max_idx=i;
-                endif;
+            if([process_entry+4]==WAIT_SEMAPHORE) then
+                break;
             endif;
-            i=i+1;
-        endwhile;
-        i=max_idx;
-    endif;
-
-    if(i==-1) then
-       [SYSTEM_STATUS_TABLE+5]=0;
-       return;
-    endif;
-
-    [PROCESS_TABLE+i*16]=0;
-    alias page_num R4;
-    page_num=4;
-    alias ptbr R5;
-    ptbr=PAGE_TABLE_BASE+i*20;
-    while(page_num<8) do
-        if([ptbr+2*page_num]!=-1) then
-            alias pageNumber R6;
-            pageNumber=[ptbr+2*page_num];
-            multipush(R0,R1,R2,R3,R4,R5,R6);
+            if([process_entry]>max_tick && ([process_entry+4]!=RUNNING && [process_entry+4]!=TERMINATED && [process_entry+4]!=ALLOCATED)) then
+                max_id=i;
+                max_tick=[process_entry];
+            endif;
+        endif;
+        i=i+1;
+   endwhile;
+   if(i==15) then
+      if(max_id==-1) then
+         [SYSTEM_STATUS_TABLE+5]=0;
+         return;
+      else 
+         i=max_id;
+      endif;
+   endif;
+   process_entry=PROCESS_TABLE+i*16;
+   [process_entry]=0;
+   alias page_num R7;
+   page_num=2;
+   alias ptbr R8;
+   ptbr=PAGE_TABLE_BASE+i*20;
+   while(page_num<10) do
+        alias flag R9;
+        flag=1;
+        alias x R11;
+        x=ptbr+2*page_num;
+        if([x]!=-1) then
+            if((page_num==2||page_num==3) && [MEMORY_FREE_LIST+[x]]>1) then
+                flag=0;
+            endif;
+            if(flag==1) then
+               multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+               R1=GET_SWAP_BLOCK;
+               call MOD_2;
+               R10=R0;
+               multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);               
+           
+               multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+               R1=DISK_STORE;
+               R4=R10;
+               R2=15;
+               R3=[x];
+               call MOD_4;
+               multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+            
+               [DISK_MAP_TABLE+i*10+page_num]=R10;
+               
+               multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+               R1=RELEASE_PAGE;
+               R2=[x];
+               call MOD_2;
+               multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+               
+               [x]=-1;
+               [x+1]="0000";
+            endif;
+        endif;
+        page_num=page_num+1;
+        if(page_num==4) then
+            page_num=8;
+        endif;
+   endwhile;
+   page_num=4;
+   while(page_num<8) do
+        alias x R9;
+        x=ptbr+2*page_num;
+        if([x]!=-1) then
+            multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
             R1=RELEASE_PAGE;
-            R2=pageNumber;
+            R2=[x];
             call MOD_2;
-            multipop(R0,R1,R2,R3,R4,R5,R6);
-            [ptbr+2*page_num]=-1;
-            [ptbr+2*page_num+1]="0000";
-        endif;
+            multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R11);
+        endif;            
+        [x]=-1;
+        [x+1]="0000";
+
         page_num=page_num+1;
-    endwhile;
-    page_num=2;
-    alias ptbr R5;
-    while(page_num<4) do
-        alias pageNumber R6;
-        pageNumber=[ptbr+2*page_num];
-        if(pageNumber!=-1 && [MEMORY_FREE_LIST+pageNumber]==1) then
-           multipush(R0,R1,R2,R3,R4,R5,R6);
-           R1=GET_SWAP_BLOCK;
-           call MOD_2;
-           R10=R0;
-           multipop(R0,R1,R2,R3,R4,R5,R6);
-           
-           alias disk_map_entry R7;
-           disk_map_entry=DISK_MAP_TABLE+i*10;
-           [disk_map_entry+page_num]=R10;
-
-           multipush(R0,R1,R2,R3,R4,R5,R6);
-           R1=DISK_STORE;
-           R2=i;
-           R3=pageNumber;
-           R4=R10;
-           call MOD_4;
-           multipop(R0,R1,R2,R3,R4,R5,R6);
-
-           multipush(R0,R1,R2,R3,R4,R5,R6);
-           R1=RELEASE_PAGE;
-           R2=pageNumber;
-           call MOD_2;
-           multipop(R0,R1,R2,R3,R4,R5,R6);
-           [ptbr+2*page_num]=-1;
-           [ptbr+2*page_num+1]="0000";           
-        endif;
-        page_num=page_num+1;
-    endwhile;
-
-    page_num=8;
-    while(page_num<10) do
-        alias blockNum R10;
-        alias pageNumber R6;
-        pageNumber=[ptbr+2*page_num];
-        
-        multipush(R0,R1,R2,R3,R4,R5,R6);
-        R1=DISK_STORE;
-        R2=i;
-        R3=pageNumber;
-        R4=blockNum;
-        call MOD_4;
-        multipop(R0,R1,R2,R3,R4,R5,R6);
-
-        alias disk_map_entry R7;
-        disk_map_entry=DISK_MAP_TABLE+i*10;
-        [disk_map_entry+page_num]=R10;
-           
-        multipush(R0,R1,R2,R3,R4,R5,R6);
-        R1=RELEASE_PAGE;
-        R2=pageNumber;
-        call MOD_2;
-        multipop(R0,R1,R2,R3,R4,R5,R6);
-
-        [ptbr+2*page_num]=-1;
-        [ptbr+2*page_num+1]="0000";
-        page_num=page_num+1;
-    endwhile;
-
-    [PROCESS_TABLE+i*16+6]=1;
-    [SYSTEM_STATUS_TABLE+4]=[SYSTEM_STATUS_TABLE+4]+1;
-    [SYSTEM_STATUS_TABLE+5]=0;
-    return;
+   endwhile;
+   [process_entry+6]=1;
+   [SYSTEM_STATUS_TABLE+4]=[SYSTEM_STATUS_TABLE+4]+1;
+   [SYSTEM_STATUS_TABLE+5]=0;
+   return;
 endif;
 
 if(functionNum==SWAP_IN) then
     alias i R3;
-    i=0;
-    alias maxID R4;
-    alias maxTICK R5;
-    maxTICK=0;
-    maxID=-1;
-    while(i<16) do
-        alias process_entry R6;
+    i=3;
+    alias max_id R4;
+    alias max_tick R5;
+    max_id=-1;
+    max_tick=-1;
+    alias process_entry R6;
+    while(i<15) do    
         process_entry=PROCESS_TABLE+i*16;
-        if([process_entry+4]==READY) then
-            if(maxTICK<[process_entry]) then
-                maxTICK=[process_entry];
-                maxID=i;
-            endif;
+        if([process_entry]>max_tick && [process_entry+4]==READY && [process_entry+6]==1) then
+            max_tick=[process_entry];
+            max_id=i;
         endif;
         i=i+1;
     endwhile;
-    i=maxID;
-    if(i==-1) then
-        [SYSTEM_STATUS_TABLE+5]=0;
-        return;
+    if(max_id==-1) then
+       [SYSTEM_STATUS_TABLE+5]=0;
+       return;
+    else
+        i=max_id;
     endif;
-    alias page_num R4;
-    page_num=4;
-    alias ptbr R5;
-    ptbr=PAGE_TABLE_BASE+i*20;
+    process_entry=PROCESS_TABLE+i*16;
+    [process_entry]=0;
+    alias page_num R7;
     page_num=2;
-    alias disk_map_entry R6;
-    disk_map_entry=DISK_MAP_TABLE+i*10;
-    while(page_num<4) do
-        if([disk_map_entry+page_num]!=-1) then
-            multipush(R0,R1,R2,R3,R4,R5,R6);
-            R1=GET_FREE_PAGE;
-            call MOD_2;
-            R10=R0;
-            multipop(R0,R1,R2,R3,R4,R5,R6);
+    while(page_num<10) do
+        alias ptbr R8;
+        ptbr=PAGE_TABLE_BASE+i*20;
+        alias x R9;
+        x=DISK_MAP_TABLE+i*10+page_num;
+        if([x]!=-1) then
+           multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           R1=GET_FREE_PAGE;
+           call MOD_2;
+           R10=R0;
+           multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           
+           multipush(R10);
 
-            multipush(R0,R1,R2,R3,R4,R5,R6);
-            R1=DISK_LOAD;
-            R2=i;
-            R3=R10;
-            R4=[disk_map_entry+page_num];
-            call MOD_4;
-            multipop(R0,R1,R2,R3,R4,R5,R6);
-
-            multipush(R0,R1,R2,R3,R4,R5,R6);
-            R1=RELEASE_BLOCK;
-            R2=[disk_map_entry+page_num];
-            R3=i;
-            call MOD_2;
-            multipop(R0,R1,R2,R3,R4,R5,R6);
-
-            [ptbr+2*page_num]=R10;
-            [ptbr+2*page_num+1]="0110";
-            [disk_map_entry+page_num]=-1;
+           multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           R1=DISK_LOAD;
+           R2=15;
+           R4=[x];
+           R3=R10;
+           call MOD_4;
+           multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           
+           multipush(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           R1=RELEASE_BLOCK;
+           R2=[x];
+           R3=15;
+           call MOD_2;
+           multipop(R0,R1,R2,R3,R4,R5,R6,R7,R8,R9);
+           
+           multipop(R10);
+           [ptbr+2*page_num]=R10;
+           [ptbr+2*page_num+1]="0110";
+           [x]=-1;
         endif;
         page_num=page_num+1;
+        if(page_num==4) then
+            page_num=8;
+        endif;
     endwhile;
-    page_num=8;
-    while(page_num<10) do
-        multipush(R0,R1,R2,R3,R4,R5,R6);
-        R1=GET_FREE_PAGE;
-        call MOD_2;
-        R10=R0;
-        multipop(R0,R1,R2,R3,R4,R5,R6);
-
-        multipush(R0,R1,R2,R3,R4,R5,R6);
-        R1=DISK_LOAD;
-        R2=i;
-        R3=R10;
-        R4=[disk_map_entry+page_num];
-        call MOD_4;
-        multipop(R0,R1,R2,R3,R4,R5,R6);
-
-        multipush(R0,R1,R2,R3,R4,R5,R6);
-        R1=RELEASE_BLOCK;
-        R2=[disk_map_entry+page_num];
-        R3=i;
-        call MOD_2;
-        multipop(R0,R1,R2,R3,R4,R5,R6);
-
-        [ptbr+2*page_num]=R10;
-        [ptbr+2*page_num+1]="0110";
-        [disk_map_entry+page_num]=-1;
-        
-        page_num=page_num+1;
-    endwhile;
-
-    [PROCESS_TABLE+i*16+6]=0;
+    breakpoint;
+    [process_entry+6]=0;
     [SYSTEM_STATUS_TABLE+4]=[SYSTEM_STATUS_TABLE+4]-1;
     [SYSTEM_STATUS_TABLE+5]=0;
     return;

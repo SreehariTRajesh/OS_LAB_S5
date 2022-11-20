@@ -1,0 +1,66 @@
+alias userSP R0;
+userSP=SP;
+alias process_entry R1;
+process_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+[process_entry+9]=27;
+[process_entry+13]=SP;
+SP=[process_entry+11]*512-1;
+alias pid R2;
+pid=[SYSTEM_STATUS_TABLE+1];
+alias retaddr R3;
+alias userName R4;
+alias password R5;
+userName=[ [ PTBR+2 * (userSP-4)/512] * 512 + (userSP-4) % 512];
+password=[ [ PTBR+2*(userSP-3)/512]*512+ (userSP-3) % 512];
+retaddr=[ [ PTBR+2 * (userSP-1)/512 ] * 512+ (userSP-1) % 512 ];
+if(pid!=1) then
+    [retaddr]=-2;
+    SP=[process_entry+13];
+    [process_entry+9]=0;
+    ireturn;
+endif;
+
+encrypt R5;
+
+alias i R6;
+i=0;
+
+while(i<16) do
+    if([USER_TABLE+i*2]==userName) then
+       break;
+    endif;    
+    i=i+1;
+endwhile;
+
+if(i==16) then
+    [retaddr]=-1;
+    SP=[process_entry+13];
+    [process_entry+9]=0;
+    ireturn;
+endif;
+
+alias user_entry R7;
+user_entry=USER_TABLE+i*2;
+
+if ( password != [user_entry+1] ) then
+    [retaddr]=-1;
+    SP=[process_entry+13];
+    [process_entry+9]=0;
+    ireturn;
+endif;
+
+alias shell_entry R8;
+shell_entry=PROCESS_TABLE+2*16;
+
+[shell_entry+4]=CREATED;
+[shell_entry+3]=i;
+
+[SYSTEM_STATUS_TABLE]=i;
+
+backup;
+call MOD_5;
+restore;
+
+[process_entry+9]=0;
+SP=[process_entry+13];
+ireturn;

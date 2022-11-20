@@ -1,16 +1,17 @@
 cd ../expl 
-./expl ../stage26/ru.expl
-cd ../expl 
-./expl ../stage26/login.expl
-echo "login.expl compiled"
-./expl ../stage26/exshell.expl
-echo "extended shell compiled"
-./expl ../stage26/lu.expl
-echo "lu compiled"
+echo "X";
+./expl ../stage27/assignments/merge.expl
+echo "Y";
+./expl ../stage27/assignments/m_sort.expl
+echo "Z";
+./expl ../stage27/assignments/m_store.expl
+echo "A";
+./expl ../stage27/assignments/m_merge.expl
+echo "B";
+./expl ../stage27/assignments/pid.expl
 cd ../spl
-./../stage26/compile.sh
+./../stage27/compile.sh
 cd ../xfs-interface
-./xfs-interface < ../stage26/batch.txt;
+./xfs-interface < ../stage27/batch.txt;
 cd ../xsm
 ./xsm --timer 1024
-cd ../stage24

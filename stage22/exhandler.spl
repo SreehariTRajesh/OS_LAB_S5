@@ -37,7 +37,6 @@ if([PROCESS_TABLE+[SYSTEM_STATUS_TABLE]*16+13]==PTLR*512-1) then
    R1=EXIT_PROCESS;
    R2=[SYSTEM_STATUS_TABLE+1];
    call MOD_1;
-   R13=R13+1;
    call MOD_5;
 endif;
 
@@ -56,7 +55,6 @@ if(EC==1) then
    R2=[SYSTEM_STATUS_TABLE+1];
    call MOD_1;
    multipop(R1,R2);
-   R13=R13+1;
    backup;
    call MOD_5;
    restore;
@@ -78,7 +76,6 @@ if(EC==2) then
    R2=[SYSTEM_STATUS_TABLE+1];
    call MOD_1;
    multipop(R1,R2);
-   R13=R13+1;
    backup;
    call MOD_5;
    restore;

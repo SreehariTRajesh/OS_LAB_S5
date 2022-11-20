@@ -34,7 +34,6 @@ endif;
 if(fNum==ACQUIRE_DISK) then
     while([DISK_STATUS_TABLE]==1) do
         [PROCESS_TABLE+currPID*16+4]=WAIT_DISK;
-        R13=R13+1;
         backup;
         call MOD_5;
         restore;
